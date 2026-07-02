@@ -8,7 +8,7 @@ the total gas is linearly readable from the autoencoder's code ($R^2(m\mid\mathb
 Replacing concentrations with the CLR composition removes magnitude by construction and
 recovers fault \emph{type}: KMeans on the standardised 5-D CLR reaches ARI~$0.49$, and the
 deployed two-dimensional PCA projection \textbf{ARI~$0.545\pm0.002$} (NMI~$0.54$), versus
-$0.12$ for raw proportions (Fig.~\ref{fig:sdcae}). The improvement is therefore due
+$0.12$ for raw proportions (Fig.~\ref{fig:repr}a). The improvement is therefore due
 specifically to the log-ratio geometry---not to normalisation, and \emph{not to the neural
 network}: the SD-CAE autoencoder reaches only $0.47\pm0.06$, and the adversarial independence
 term degrades it further (ARI $0.30$--$0.31$ at $\lambda=1$--$10$), confirming that part of the
@@ -19,33 +19,28 @@ yields ARI $0.45$---and is stable for zero-replacement $\delta\le10^{-3}$ (ARI $
 though it degrades at $\delta=10^{-2}$, an unavoidable sensitivity when acetylene is zero in
 $97\%$ of samples; at unit level (latest sample per unit) agreement is $0.35$. The
 two-dimensional code is a learned, label-free diagnostic map on which Duval classes separate
-visibly (Fig.~\ref{fig:map}). Because Duval is a deterministic rule rather than an
+visibly (Fig.~\ref{fig:repr}b). Because Duval is a deterministic rule rather than an
 attention-driven label, this is our most defensible result; the moderate absolute ARI reflects
 that Duval itself is a heuristic over an imbalanced fleet, so we report the large
 \emph{relative} gain.
 
-\begin{figure}[t]
+\begin{figure*}[!t]
   \centering
-  \includegraphics[width=\columnwidth]{representation_ablation}
-  \caption{Fault-type agreement with Duval across representations (mean$\pm$std, five seeds).
-  The gain comes from the CLR log-ratio geometry; a linear PCA projection beats the SD-CAE
-  autoencoder, reported as a negative ablation.}
-  \label{fig:sdcae}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.86\columnwidth]{clr_pca_map}
-  \caption{Learned label-free diagnostic map: PCA-2 of the standardised CLR coloured by Duval
-  class. Discharge (D1/D2), partial discharge, and thermal (T1--T3) regions separate.}
-  \label{fig:map}
-\end{figure}
+  \includegraphics[width=0.9\textwidth]{representation_panel}
+  \caption{Severity-disentangled compositional representation. (a) Fault-type agreement with
+  Duval across representations (mean$\pm$std, five seeds): the gain comes from the CLR
+  log-ratio geometry, and a linear PCA projection beats the SD-CAE autoencoder (negative
+  ablation). (b) The deployed label-free diagnostic map---PCA-2 of the standardised
+  CLR---coloured by Duval class; discharge (D1/D2), partial discharge, and thermal (T1--T3)
+  regions separate.}
+  \label{fig:repr}
+\end{figure*}
 
 \subsection{Label-free health/risk screening}
 The risk index ranks the fleet with AUC~$0.74$ (unit-bootstrap $95\%$ CI $[0.68,0.80]$) against
 \texttt{fault\_note}, versus $0.52$--$0.56$ for the conventional severity proxies---though a
 trivial sample-count predictor reaches a statistically indistinguishable $0.76$ on this
-confounded label (Fig.~\ref{fig:confound}), so the comparison must be read against that floor
+confounded label (Fig.~\ref{fig:confound}a), so the comparison must be read against that floor
 (Sec.~\ref{subsec:confound}). Its top decile carries a
 $\sim$$2.4\times$ event rate and its top ten units a $\sim$$4.4\times$ rate; the event rate
 falls from $\sim$27\% in the riskiest decile to $\sim$2\% in the safest, with the five riskiest
@@ -68,12 +63,23 @@ optimism; the component ordering, not the third decimal, is the finding.
   \label{fig:health}
 \end{figure}
 
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.93\textwidth]{confound_panel}
+  \caption{The surveillance-bias analysis. (a) A trivial sample count matches the physics index
+  against the field-note label and exceeds every conventional severity baseline (the confound
+  floor). (b) Strict temporal hold-out: the score's forward validity vanishes once the
+  sample-count confound is controlled, while the count alone forward-predicts. (c) Confound-free
+  chemistry target (arcing onset): gas chemistry predicts, the sampling confound does not.}
+  \label{fig:confound}
+\end{figure*}
+
 \subsection{The field-event label is surveillance-confounded}
 \label{subsec:confound}
 This is the paper's cautionary result. A trivial predictor---how many times a unit has been
 sampled---scores AUC~$\mathbf{0.76}$ against \texttt{fault\_note}, statistically
 indistinguishable from the physics index ($0.74$; paired-bootstrap difference CI
-$[-0.10,+0.06]$, $p=0.58$) and far above the conventional baselines (Fig.~\ref{fig:confound}).
+$[-0.10,+0.06]$, $p=0.58$) and far above the conventional baselines (Fig.~\ref{fig:confound}a).
 The mechanism is operational: utilities re-sample units they are worried about, so the sample
 count encodes attention rather than gas chemistry, and $69\%$ of the notes contain Thai text
 largely missed by the English keyword label. In a joint logistic model the count adds signal
@@ -85,7 +91,7 @@ indicating that part of its edge came from label incompleteness. The consequence
 under a strict temporal hold-out: a label-free score built from each unit's first-half history
 predicts second-half events at AUC $0.54$, the first-half sample count alone predicts them
 better ($0.68$), and once the score is residualised on that count its forward AUC falls to
-chance ($0.50$, Fig.~\ref{fig:holdout}). Because the first-half sample count is known
+chance ($0.50$, Fig.~\ref{fig:confound}b). Because the first-half sample count is known
 \emph{before} the second-half events, this is a prospective effect, not reverse causation. We
 therefore do not claim genuine forward fault prediction from \texttt{fault\_note}; any AUC
 against it must be read against the $0.76$ confound floor.
@@ -97,31 +103,7 @@ positives are rare and clustered: 45 positive points arising from only 17 onset 
 Accounting for this clustering with a unit-blocked bootstrap, ethylene and hydrogen forecast
 onset at AUC $0.64$ ($95\%$ CI $[0.52,0.77]$) and $0.63$ ($[0.53,0.73]$)---both excluding
 chance---while the sample count is uninformative ($0.49$, CI $[0.38,0.58]$,
-Fig.~\ref{fig:chem}); the result is robust across nine onset-threshold and horizon variants
+Fig.~\ref{fig:confound}c); the result is robust across nine onset-threshold and horizon variants
 (AUC $0.64$--$0.73$). Thermal activity (ethylene) and incipient hydrogen thus precede
 arcing---a physically sensible, confound-free early signal, modest in effect size and with wide
 intervals owing to the rarity of the event, but distinguishable from chance.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.96\columnwidth]{label_confound_floor}
-  \caption{The sample count (confound) out-predicts the physics index and every conventional
-  severity baseline against the field-note label.}
-  \label{fig:confound}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.82\columnwidth]{label_confound_holdout}
-  \caption{Strict temporal hold-out: the score's forward validity vanishes once the sample-count
-  confound is controlled, while the count alone forward-predicts.}
-  \label{fig:holdout}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.86\columnwidth]{chemistry_target_arcing_onset}
-  \caption{Confound-free chemistry target (arcing onset): gas chemistry predicts, the sampling
-  confound does not.}
-  \label{fig:chem}
-\end{figure}

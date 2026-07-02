@@ -38,16 +38,7 @@ After cleaning, the gases have essentially no missing values; sparsity instead a
 zeros---acetylene is zero in $97.4\%$ of samples, consistent with arcing being rare. The
 concentrations are heavily right-skewed and remain skewed for C2H2 and C2H4 even after a
 logarithmic transform. One oxygen reading is a clear data-entry error (about
-$7.2\times10^{8}$~ppm), which motivates outlier clipping. Figure~\ref{fig:gasdist} shows the
-per-gas distributions on a logarithmic scale.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{eda_gas_distributions}
-  \caption{Per-gas concentration distributions ($\log(1+x)$). The heavy right-skew motivates
-  the log transform; acetylene is zero in most samples.}
-  \label{fig:gasdist}
-\end{figure}
+$7.2\times10^{8}$~ppm), which motivates outlier clipping.
 
 \textbf{Preprocessing.}
 The pipeline is configuration-driven: each gas is clipped at its 99.9th percentile, missing
