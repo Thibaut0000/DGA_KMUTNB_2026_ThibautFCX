@@ -1,0 +1,51 @@
+\section{Experimental Setup}
+\label{sec:exp}
+
+\textbf{Data and preprocessing.} We use the dataset of Section~\ref{sec:data} (4{,}563 main-tank samples
+from 628 transformers, 2019--2024; median 6 samples per unit over $\sim$4.5 years). Gas values
+are clipped at the 99.9th percentile, missing readings imputed as zero (below detection),
+log-transformed, and standardised; SD-CAE additionally uses the CLR composition of the five
+combustible gases (H2, CH4, C2H2, C2H4, C2H6). The weak label \texttt{fault\_note} is positive for 71 of 628 units
+($11.3\%$).
+
+\textbf{Baselines.} For fault-type recovery we compare the deployed CLR-PCA representation
+against clustering on standardised log-concentrations (the severity baseline) and on raw
+proportions, KMeans and a Gaussian mixture directly on the 5-D CLR, and the SD-CAE autoencoder
+with adversary weights $\lambda\in\{0,1,10\}$ (all negative ablations). For risk screening we compare the
+index against conventional severity proxies---total combustible gas, a C57.104-style count of
+gases above the fleet 90th percentile, and a Duval-arcing flag---and against the sample-count
+confound. For the anomaly term we compare autoencoder reconstruction, Isolation Forest, and
+Deep~SVDD, plus a battery of standard detectors.
+
+\textbf{Metrics.} Fault-type recovery is measured by ARI and NMI against the Duval classes (a
+deterministic rule, hence a confound-free target). Risk ranking is measured by AUC against
+\texttt{fault\_note}, precision at the top-$k$ units, and the event rate by risk decile;
+severity leakage of a representation is measured by $R^2(m\mid\mathbf{z})$. Stochastic results
+are reported as mean~$\pm$~standard deviation over multiple seeds; headline AUCs carry
+unit-level bootstrap $95\%$ confidence intervals, paired comparisons use a paired bootstrap,
+and the chemistry target of Section~\ref{sec:results} uses a unit-blocked cluster bootstrap
+because its positives concentrate in few units.
+
+\textbf{Implementation.} Models are small multilayer perceptrons trained on CPU (PyTorch); the
+data is small enough that no GPU is required. Every figure and number is produced by versioned
+scripts writing to a results directory, with fixed seeds for reproducibility. The main
+hyperparameters are listed in Table~\ref{tab:hp}.
+
+\begin{table}[t]
+\centering
+\caption{Main hyperparameters.}
+\label{tab:hp}
+\begin{tabular}{ll}
+\toprule
+Component & Setting \\
+\midrule
+Deployed representation & CLR $\rightarrow$ standardise $\rightarrow$ PCA, 2 components \\
+SD-CAE (ablation) & MLP $16\text{--}8$, ReLU, latent 2; Adam, lr $10^{-3}$ \\
+SD-CAE training & batch 128, 200 epochs, early stop (patience 20) \\
+CLR zero-replacement $\delta$ & $10^{-3}$ (sensitivity: $10^{-4}$--$10^{-2}$) \\
+Adversary weight $\lambda$ & ablated at 0, 1, 10 (not deployed) \\
+Index weights & severity 1, acetylene 2, temporal 1, anomaly 1 \\
+Clustering & KMeans, $k=7$ (Duval classes); silhouette $k$ as check \\
+\bottomrule
+\end{tabular}
+\end{table}

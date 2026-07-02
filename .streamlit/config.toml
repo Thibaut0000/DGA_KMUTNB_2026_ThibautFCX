@@ -1,0 +1,15 @@
+# Streamlit theme for the DGA fleet-health dashboard.
+[theme]
+base = "light"
+primaryColor = "#4f46e5"
+backgroundColor = "#f6f7fb"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1c2128"
+font = "sans serif"
+
+[server]
+headless = true
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

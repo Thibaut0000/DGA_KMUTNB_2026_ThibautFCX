@@ -1,0 +1,28 @@
+\section{Conclusion and Future Work}
+
+We studied label-free condition monitoring of a real transformer fleet from Dissolved Gas
+Analysis and reported three results. (1) A severity-disentangled compositional
+representation---the centred log-ratio of the combustible-gas composition---recovers fault
+\emph{type} by construction, raising agreement with the Duval classes from ARI $0.16$ to $0.55$
+with a simple linear projection; the neural (SD-CAE) and adversarial-independence variants are
+documented negatives. (2) The field-event notes commonly used to validate such models are, in
+this fleet, confounded by surveillance bias: a trivial sample count matches the gas chemistry
+(AUC $0.76$ vs $0.74$, difference not significant) and a label-free score built from these
+features loses its apparent forward validity once that count is controlled. (3) A label-free
+health/risk index nonetheless outranks conventional severity baselines, and on a confound-free,
+chemistry-defined target the gas trajectory weakly forecasts the onset of arcing.
+
+\textbf{Limitations.} The dataset has no ground-truth fault labels, so every result is measured
+against a rule (Duval) or a weak, biased note label; the fault-type agreement is moderate; and
+the findings come from a single fleet. The methods are deliberately simple---a linear projection
+in the right geometry and small multilayer perceptrons---rather than a new architecture.
+
+\textbf{Future work.} The highest-leverage improvement is a better target---completing the
+domain validation of our Thai-note translation (which already recovers 15 missed event notes)
+or obtaining real failure/maintenance records---after which the risk and prognostic claims can
+be strengthened. We
+also see promise in confound-free, chemistry-defined prognostic targets, in survival/remaining-
+useful-life modelling of gassing trends, and, following recent surveys \cite{ramarao2026review},
+in physics-informed and digital-twin extensions. More broadly, we recommend that DGA studies
+which validate against operator-logged events report the sample-count confound floor, as a
+trivial surveillance signal can otherwise be mistaken for diagnostic skill.

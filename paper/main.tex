@@ -1,0 +1,79 @@
+%=======================================================================
+% Label-Free Compositional DGA Representations and a Surveillance-Bias
+% Caution for Transformer Risk Screening
+% Thibaut Faucheux — CESI / KMUTNB — Research Initiation, 2026
+%
+% Build:  pdflatex main && bibtex main && pdflatex main && pdflatex main
+% (or use latexmk -pdf main.tex). Requires the IEEEtran class.
+%=======================================================================
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{url}
+\graphicspath{{../results/figures/}}
+
+% Inline TODO marker — grep for "TODO" before submission.
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\begin{document}
+
+\title{Label-Free Compositional DGA Representations and a
+Surveillance-Bias Caution for Transformer Risk Screening}
+
+\author{\IEEEauthorblockN{Thibaut Faucheux}
+\IEEEauthorblockA{CESI Engineering School, France \\
+KMUTNB, Bangkok, Thailand \\
+Email: thibautfaucheux1@gmail.com}
+\and
+\IEEEauthorblockN{Dr. Rattanakorn Phadungthin}
+\IEEEauthorblockA{College of Industrial Technology \\
+KMUTNB, Bangkok, Thailand}}
+
+\maketitle
+
+\begin{abstract}
+Dissolved Gas Analysis (DGA) interpretation for power transformers remains
+rule-based (IEC ratios, Rogers, the Duval Triangle), expert-dependent, and
+label-scarce. This paper makes three contributions, learned \emph{without any fault
+labels}, on a longitudinal field dataset of 4563 samples from 628 transformers
+(2019--2024). First, we show that representing each sample by the centred log-ratio (CLR) of its
+combustible-gas composition separates fault \emph{type} from gassing \emph{severity}
+by construction: clustering a two-dimensional \emph{linear} projection of the CLR
+recovers Duval fault-type structure (adjusted Rand index $0.55$ vs $0.16$ for raw
+concentrations), while a neural autoencoder (SD-CAE) and an adversarial
+disentanglement term add nothing over this linear pipeline---negative results we
+report. Second, and importantly, we show that the field-event notes commonly used to
+validate such models are \emph{confounded by surveillance bias}: a trivial
+sampling-count predicts logged events as well as the gas chemistry does, and a
+label-free risk score loses its apparent forward validity once this is controlled---a caution
+for the DGA machine-learning literature, for which we give a confound-free
+chemistry-based evaluation. Third, we build a label-free health/risk screening index
+(severity, acetylene-aware, temporal, and anomaly terms) that outranks conventional
+severity baselines, reported together with the confound floor. Our results indicate that
+label-free compositional representations are a useful basis for DGA fault-type discovery, and
+that---at least in this fleet---a trivial sample count can dominate operator-logged event labels,
+so DGA risk models validated on such labels should report a sample-count confound floor.
+\end{abstract}
+
+\begin{IEEEkeywords}
+label-free representation learning, dissolved gas analysis, compositional data analysis,
+fault diagnosis, label bias, transformer condition monitoring
+\end{IEEEkeywords}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_data}
+\input{sections/04_method}
+\input{sections/05_experiments}
+\input{sections/06_results}
+\input{sections/07_conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

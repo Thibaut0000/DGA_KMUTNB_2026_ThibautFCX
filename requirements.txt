@@ -1,0 +1,34 @@
+# Core scientific stack
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11
+scikit-learn>=1.4
+
+# Deep learning
+torch>=2.2          # Autoencoder / VAE. CPU build is plenty for this dataset.
+
+# Unsupervised / dimensionality reduction
+umap-learn>=0.5
+hdbscan>=0.8.33
+
+# Plotting (paper-quality figures)
+matplotlib>=3.8
+seaborn>=0.13
+
+# I/O & config
+openpyxl>=3.1       # read the .xlsx
+pyarrow>=14.0       # write/read data/processed/*.parquet
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# Notebooks & utils
+jupyterlab>=4.0
+tqdm>=4.66
+joblib>=1.3
+
+# Interactive dashboard (dashboard/app.py)
+streamlit>=1.36
+plotly>=5.22
+
+# Tests (tests/test_smoke.py)
+pytest>=8.0

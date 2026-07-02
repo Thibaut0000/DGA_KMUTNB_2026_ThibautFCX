@@ -1,0 +1,4 @@
+,AUC vs fault_note
+AE reconstruction,0.5826484941967786
+Isolation Forest,0.6033074569499582
+Deep SVDD,0.5200141603661466

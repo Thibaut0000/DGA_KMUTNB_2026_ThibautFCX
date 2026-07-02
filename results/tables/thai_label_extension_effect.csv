@@ -1,0 +1,5 @@
+,positive_units,rate_%,AUC_index,AUC_n_samples,gap (n - index)
+original (EN regex),71.0,11.3,0.74,0.761,0.021
++Thai tier A,77.0,12.3,0.735,0.734,-0.0
++Thai A+B,80.0,12.7,0.724,0.734,0.01
++Thai A+B+C,83.0,13.2,0.714,0.742,0.028

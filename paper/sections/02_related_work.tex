@@ -1,0 +1,59 @@
+\section{Related Work}
+\label{sec:related}
+
+We organise prior work along the trajectory mapped by a recent 34-page survey
+\cite{ramarao2026review}: rule-based interpretation, supervised machine learning, and
+unsupervised / representation learning. We then add the point that motivates this paper:
+how such models are \emph{validated}.
+
+\textbf{Conventional DGA interpretation.}
+The dominant methods are rule-based: the key-gas method, the IEC~60599 and Rogers gas
+ratios, and the Duval Triangle and Pentagon
+\cite{iec60599,ieee_c57104,duval2002review,duval2008ltc,duval2001interp}. They are simple and
+interpretable but rely on fixed thresholds, require expert judgement, and leave borderline
+cases ``not determined''. The current IEEE guide bases its gas-level norms on the 90th and
+95th percentiles of a large population and embeds the Duval Triangle as an interpretation
+aid \cite{ieee_c57104}.
+
+\textbf{Supervised machine learning for DGA.}
+Most learning-based work casts fault diagnosis as supervised classification, using neural
+networks \cite{zhang1996ann}, support vector machines \cite{bacha2012svm,fei2009svmga}, and
+more recently ensembles and deep models; the survey reports accuracies rising from
+$\sim$85--95\% (classical ML, few hundred samples) to $>$97\% (deep learning, $\geq$5000
+samples) at the cost of opacity and data hunger \cite{ramarao2026review}. A representative
+recent system fuses the four conventional methods into a single ``AI-score'' feature and
+reaches $99.17\%$ \cite{hybrid_aiscore2026}, but it requires fault labels \emph{and} the
+conventional rules as inputs. The recent transformer \emph{Health Index} literature is
+likewise supervised: it predicts an expert-defined health score, so it needs that score as a
+label. The survey names prognostics and remaining-useful-life estimation as the open frontier.
+
+\textbf{Unsupervised and representation learning.}
+Autoencoders \cite{hinton2006reducing} and variational autoencoders \cite{kingma2014vae}
+learn compact representations without labels, and statistical-ML reviews of DGA exist
+\cite{mirowski2012review}. Closest to our work, Wang et al.\ \cite{wang2016csae} apply a
+sparse autoencoder to DGA, but a supervised back-propagation head performs the final
+classification and the input is the IEC ratios on 134 samples. Liu et al.\
+\cite{dga_dbscan2020} cluster DGA with a correlation-coefficient DBSCAN, but tune
+amplification coefficients using known fault categories on 60 class-balanced samples.
+A common thread is that fault \emph{type} is read from per-sample gas \emph{proportions} (Duval
+percentages, IEC ratios, Liu's relative contents), which discards magnitude---an observation
+we make explicit and exploit. Dukarm et al.\ make the geometric setting explicit by treating
+the gas proportions as points on a simplex, generalising the Duval triangle to four dimensions
+\cite{dukarm2020simplex}, but retain Euclidean coordinates; to our knowledge the log-ratio
+(Aitchison) geometry of compositional data analysis \cite{aitchison1982coda} has not previously
+been applied to DGA.
+
+\textbf{Gap and the validation problem.}
+Two gaps motivate this work. First, existing ``unsupervised'' DGA still depends on labels (for
+a classifier head or for parameter tuning) and on small, curated, balanced datasets; we study
+an end-to-end label-free pipeline on a real, imbalanced operational fleet. Second, and more
+subtly, label-free risk and health models are routinely validated against operator-logged
+field events. We show that, in our fleet, this validation is \emph{confounded by surveillance bias}---units
+that operators watch closely are both sampled more and more likely to have a logged event---so
+a trivial sampling count predicts logged events as well as the gas chemistry does. This
+phenomenon is well documented in epidemiology and health-records machine learning as
+surveillance or informed-presence bias \cite{sackett1979bias,haut2011surveillance,%
+goldstein2016informed}; to our knowledge it has not been reported for DGA. We quantify it,
+adapt the standard control---conditioning on the encounter count \cite{goldstein2016informed}---%
+to transformer risk validation, and accordingly lead with a confound-free fault-type result and
+provide a confound-free evaluation target.

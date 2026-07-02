@@ -1,0 +1,82 @@
+\section{Methods}
+\label{sec:method}
+
+We present three label-free components: a compositional representation that recovers fault
+\emph{type} (Section~\ref{ssec:sdcae}); a health/risk screening index (Section~\ref{ssec:index});
+and an evaluation protocol that exposes and controls a surveillance-bias confound in the field
+labels (Section~\ref{ssec:eval}). Each sample provides seven diagnostic-gas concentrations
+(H2, CH4, C2H2, C2H4, C2H6, CO, CO2); the fault-type composition below is built from the five
+combustible gases, while the carbon oxides feed only the severity term (Section~\ref{ssec:index}).
+
+\subsection{Severity-disentangled compositional representation}
+\label{ssec:sdcae}
+A plain autoencoder on gas concentrations encodes overall gassing \emph{magnitude} rather than
+fault \emph{type} (Section~\ref{sec:results}). We separate \emph{how much} gas is present from
+\emph{which} gases dominate. Writing $\mathbf{x}\in\mathbb{R}^{5}_{\ge 0}$ for the five combustible
+gases (H2, CH4, C2H2, C2H4, C2H6), the total gassing and a magnitude term are
+\begin{equation}
+g = \sum_{i=1}^{5} x_i, \qquad m = \log(1+g),
+\end{equation}
+and the composition $\mathbf{p} = \mathbf{x}/g$ lies on the simplex $\mathcal{S}^{4}$. Since
+Euclidean operations are not meaningful on the simplex, we map $\mathbf{p}$ to Euclidean space
+with the centred log-ratio (CLR) transform of compositional data analysis
+\cite{aitchison1982coda},
+\begin{equation}
+\mathbf{c} = \operatorname{clr}(\mathbf{p}), \quad
+c_i = \log\!\frac{p_i}{\left(\prod_{j=1}^{5} p_j\right)^{1/5}},
+\quad \textstyle\sum_i c_i = 0 .
+\end{equation}
+CLR is undefined at zero, and the data contain many true zeros (C2H2 is zero in $97.4\%$ of
+samples), so zeros are handled by a multiplicative replacement with constant $\delta$ before the
+log-ratio; $\delta$ is treated as a sensitivity-checked hyperparameter
+(Section~\ref{sec:results}). A fault-type code is then any map $\mathbf{z}=f(\mathbf{c})$ of the
+standardised CLR coordinates: because $f$ sees only the composition,
+$f(\operatorname{clr}(\lambda\mathbf{x})) = f(\operatorname{clr}(\mathbf{x}))$ for any
+$\lambda>0$---the same fault type at any gassing level maps to the same code, severity invariance
+\emph{by construction}. We deploy the simplest instantiation: a two-dimensional
+principal-component projection of the standardised CLR. As ablations we also instantiate $f$ as
+a small autoencoder (\emph{SD-CAE}), minimising the CLR-space reconstruction loss
+$\mathcal{L}_{\text{rec}}=\frac1N\sum_n\lVert g_\phi(f_\theta(\mathbf{c}_n))-\mathbf{c}_n\rVert_2^2$,
+optionally with an adversary $h_\psi$ that tries to recover $m$ from $\mathbf{z}$ through a
+gradient-reversal layer, enforcing statistical independence $\mathbf{z}\perp m$ with strength
+$\lambda$:
+\begin{equation}
+\min_{\theta,\phi}\ \max_{\psi}\
+\mathcal{L}_{\text{rec}} - \lambda\,\tfrac{1}{N}\sum_{n}\bigl(h_\psi(\mathbf{z}_n)-m_n\bigr)^{2}.
+\end{equation}
+Neither neural component helps: the autoencoder does not improve on the linear projection, and
+since composition and severity are partly, legitimately correlated (arcing is both
+acetylene-rich and high-gas), over-enforcing independence erases fault signal; both are reported
+as negative ablations with the achieved $R^2(m\mid\mathbf{z})$ (Section~\ref{sec:results}).
+We cluster $\mathbf{z}$ with KMeans at $k=7$, fixed to the Duval class count for external
+comparison (the silhouette-selected $k$ is reported as a robustness check), and measure
+agreement with the conventional Duval classes by the adjusted Rand index (ARI) and normalised
+mutual information (NMI); the labels are used for evaluation only, never in fitting.
+The two-dimensional $\mathbf{z}$ is a learned, label-free diagnostic map.
+
+\subsection{Label-free health/risk index}
+\label{ssec:index}
+For fleet screening we summarise each transformer's history into one risk score from
+\emph{physical gas features only} (we deliberately exclude sample-count features; see
+Section~\ref{ssec:eval}). The score is a weighted sum of standardised components: a
+\emph{severity} term led by hydrogen (the universal early-fault gas) with CO2 and the total
+combustible gas; an \emph{acetylene} term (arcing, the most dangerous fault, up-weighted);
+a \emph{temporal} term, the H2 generation rate by multi-point linear regression in ppm/year
+following IEEE~C57.104; and a self-supervised \emph{anomaly} term from autoencoder
+reconstruction error and an Isolation Forest. The fleet is ranked by this score.
+
+\subsection{Evaluation and the surveillance-bias control}
+\label{ssec:eval}
+The dataset has no ground-truth fault labels. A subset of samples carry free-text field-event
+notes; we derive a weak binary label \texttt{fault\_note} by matching genuine
+protection/damage events (trip, Buchholz, differential, sudden-pressure, bushing,
+overheating), excluding administrative or maintenance entries. We report agreement with this
+label by the area under the ROC curve (AUC). Crucially, this label is \emph{not} a clean
+target: operators sample worrisome units more often, so the sample count is itself predictive
+of a logged event. We therefore (i) always co-report the AUC of the sample count alone as a
+confound floor; (ii) perform a strict temporal hold-out---features from each unit's first half
+of history predict an event in its second half---and residualise the score on the first-half
+sample count to test whether any forward signal survives; and (iii) introduce a confound-free,
+chemistry-defined target: the \emph{onset of arcing}, i.e.\ whether acetylene appears
+($>2$~ppm) within two years in a unit that currently has none. This target depends on gas
+chemistry, not operator attention, and is uncorrelated with the sample count.

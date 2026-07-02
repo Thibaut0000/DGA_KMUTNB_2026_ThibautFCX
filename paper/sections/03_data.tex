@@ -1,0 +1,73 @@
+\section{Dataset and Preprocessing}
+\label{sec:data}
+% DRAFT (2026-06-17). Numbers verified from results/ and notebook 01_eda. Own the prose.
+
+\textbf{Dataset.}
+We use DGA records from transformer main tanks: 4{,}563 samples from 628 transformers and 42
+manufacturers, sampled between 2019 and 2024 (median six samples per unit over $\sim$4.5 years).
+Rated voltages are recorded as free-text multi-winding strings (e.g.\ ``115/22'') and are not
+used as model inputs. A per-gas summary is given in Table~\ref{tab:gases}.
+% \todo{State the source utility and the anonymisation rule agreed with the supervisor.}
+
+\begin{table}[t]
+\centering
+\caption{Per-gas summary over the 4{,}563 samples (concentrations in ppm).}
+\label{tab:gases}
+\begin{tabular}{lrrr}
+\toprule
+Gas & Median & Max & \% zero \\
+\midrule
+H2   & 16    & 2{,}537  & 1.1 \\
+CH4  & 18    & 2{,}469  & 10.1 \\
+C2H2 & 0     & 954      & 97.4 \\
+C2H4 & 2     & 3{,}394  & 39.1 \\
+C2H6 & 14    & 1{,}085  & 9.5 \\
+CO   & 193   & 2{,}437  & 0.8 \\
+CO2  & 2{,}281 & 23{,}574 & 0.7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Features.}
+Each sample provides seven diagnostic gases used as model features: H2, CH4, C2H2, C2H4,
+C2H6, CO and CO2. Atmospheric oxygen and nitrogen, and the total-combustible-gas sum, are
+excluded to avoid redundancy and leakage.
+
+\textbf{Data characteristics.}
+After cleaning, the gases have essentially no missing values; sparsity instead appears as
+zeros---acetylene is zero in $97.4\%$ of samples, consistent with arcing being rare. The
+concentrations are heavily right-skewed and remain skewed for C2H2 and C2H4 even after a
+logarithmic transform. One oxygen reading is a clear data-entry error (about
+$7.2\times10^{8}$~ppm), which motivates outlier clipping. Figure~\ref{fig:gasdist} shows the
+per-gas distributions on a logarithmic scale.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{eda_gas_distributions}
+  \caption{Per-gas concentration distributions ($\log(1+x)$). The heavy right-skew motivates
+  the log transform; acetylene is zero in most samples.}
+  \label{fig:gasdist}
+\end{figure}
+
+\textbf{Preprocessing.}
+The pipeline is configuration-driven: each gas is clipped at its 99.9th percentile, missing
+readings are imputed as zero (taken as below the detection limit), a $\log(1+x)$ transform
+is applied, and the features are standardised.
+
+\textbf{Conventional labels (weak, external).}
+For comparison we compute Duval Triangle~1, IEC~60599 and Rogers labels with our reference
+implementation. The Duval class distribution (over all samples) is imbalanced: PD~1511, T1~1451,
+T2~686, T3~492, D2~30, D1~24, DT~16, with about $7.7\%$ not determined. Many of the PD samples are
+methane-dominant cases that Triangle~1, lacking a stray-gassing zone, labels PD (the Duval Pentagon
+adds such a zone); this is mostly a per-sample effect -- at the per-unit (latest-state) level only
+about 100 units are PD. We therefore treat the conventional labels as indicative, not ground truth.
+
+\textbf{Validation notes.}
+391 of 4{,}563 samples ($8.6\%$) carry a raw free-text field-event note (for example a Buchholz
+trip or a bushing failure). Filtered to genuine protection/damage events and aggregated to units,
+these give the weak unit-level label \texttt{fault\_note} used for validation (Section~\ref{sec:exp}); the
+sample-level $8.6\%$ and the unit-level label rate are therefore different quantities. Most
+notes are partly in Thai ($69\%$; $127$ are Thai-only) and invisible to an English keyword
+filter; a curated translation of all 211 distinct Thai notes (released with the code, pending
+domain validation) identifies 15 additional event notes, whose effect is evaluated in
+Section~\ref{sec:results}.

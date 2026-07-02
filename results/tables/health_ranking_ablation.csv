@@ -1,0 +1,7 @@
+,AUC,prec@30,prec@63
+severity,0.643,0.167,0.159
+severity+acetylene,0.714,0.367,0.286
++temporal,0.733,0.367,0.349
++anomaly (full),0.74,0.367,0.302
+anomaly only,0.608,0.167,0.222
+[baseline] TCG only,0.521,,

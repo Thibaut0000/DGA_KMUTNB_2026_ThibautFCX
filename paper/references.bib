@@ -1,0 +1,259 @@
+% ====================================================================
+% Bibliography — verified entries (triaged 2026-06-14).
+% [verified] details confirmed.  [to confirm] check volume/pages on the publisher page
+% before final submission.
+% IMPORTANT: BibTeX does NOT allow % comments inside @entry{...} blocks (% is not a
+% comment char there). Keep all annotations OUTSIDE the braces, between entries.
+% See docs/literature_triage.md for the full rationale.
+% ====================================================================
+
+% ---------- Conventional methods & standards ----------
+
+@misc{ieee_c57104,
+  author       = {{IEEE}},
+  title        = {{IEEE} Guide for the Interpretation of Gases Generated in
+                  Mineral Oil-Immersed Transformers},
+  howpublished = {IEEE Std C57.104-2019},
+  year         = {2019}
+}
+
+% iec60599: cite-only (paid standard, PDF not acquired). Ratio limits live in
+% src/dga/conventional.py and are reproduced in Saleh 2026 / the Duval papers.
+@misc{iec60599,
+  author       = {{International Electrotechnical Commission}},
+  title        = {Mineral Oil-Filled Electrical Equipment in Service ---
+                  Guidance on the Interpretation of Dissolved and Free Gases Analysis},
+  howpublished = {IEC 60599:2022, Ed. 4.0},
+  year         = {2022}
+}
+
+@article{duval2002review,
+  author  = {Duval, Michel},
+  title   = {A review of faults detectable by gas-in-oil analysis in transformers},
+  journal = {IEEE Electrical Insulation Magazine},
+  volume  = {18},
+  number  = {3},
+  pages   = {8--17},
+  year    = {2002}
+}
+
+@article{duval2008ltc,
+  author  = {Duval, Michel},
+  title   = {The {Duval} Triangle for Load Tap Changers, Non-Mineral Oils and Low
+             Temperature Faults in Transformers},
+  journal = {IEEE Electrical Insulation Magazine},
+  volume  = {24},
+  number  = {6},
+  pages   = {22--29},
+  year    = {2008}
+}
+
+% duval2001interp: verified from the reference lists of duval2002review and dga_dbscan2020.
+@article{duval2001interp,
+  author  = {Duval, Michel and dePablo, A.},
+  title   = {Interpretation of gas-in-oil analysis using new {IEC} publication 60599
+             and {IEC} {TC} 10 databases},
+  journal = {IEEE Electrical Insulation Magazine},
+  volume  = {17},
+  number  = {2},
+  pages   = {31--41},
+  year    = {2001}
+}
+
+% ---------- Supervised / classical ML on DGA ----------
+
+@article{zhang1996ann,
+  author  = {Zhang, Y. and Ding, X. and Liu, Y. and Griffin, P. J.},
+  title   = {An artificial neural network approach to transformer fault diagnosis},
+  journal = {IEEE Transactions on Power Delivery},
+  volume  = {11},
+  number  = {4},
+  pages   = {1836--1841},
+  year    = {1996}
+}
+
+@article{bacha2012svm,
+  author  = {Bacha, Khmais and Souahlia, Seifeddine and Gossa, Moncef},
+  title   = {Power transformer fault diagnosis based on dissolved gas analysis by
+             support vector machine},
+  journal = {Electric Power Systems Research},
+  volume  = {83},
+  number  = {1},
+  pages   = {73--79},
+  year    = {2012}
+}
+
+% fei2009svmga: verified via ScienceDirect (PII S0957417409002796) and SciRP, 2026-06.
+@article{fei2009svmga,
+  author  = {Fei, Sheng-wei and Zhang, Xiao-bin},
+  title   = {Fault diagnosis of power transformer based on support vector machine
+             with genetic algorithm},
+  journal = {Expert Systems with Applications},
+  volume  = {36},
+  number  = {8},
+  pages   = {11352--11357},
+  year    = {2009},
+  doi     = {10.1016/j.eswa.2009.03.022}
+}
+
+% mirowski2012review: verified from the reference list of wang2016csae; public PDF: mirowski.info/pub/dga
+@article{mirowski2012review,
+  author  = {Mirowski, Piotr and LeCun, Yann},
+  title   = {Statistical machine learning and dissolved gas analysis: a review},
+  journal = {IEEE Transactions on Power Delivery},
+  volume  = {27},
+  number  = {4},
+  pages   = {1791--1799},
+  year    = {2012}
+}
+
+% ---------- Unsupervised / representation learning (your topic) ----------
+
+% wang2016csae: open access, PDF in docs/refs/. Unsupervised sparse-AE feature learning on DGA.
+@article{wang2016csae,
+  author  = {Wang, Lukun and Zhao, Xiaoying and Pei, Jiangnan and Tang, Gongyou},
+  title   = {Transformer fault diagnosis using continuous sparse autoencoder},
+  journal = {SpringerPlus},
+  volume  = {5},
+  pages   = {448},
+  year    = {2016},
+  doi     = {10.1186/s40064-016-2107-7}
+}
+
+% dga_dbscan2020: Wuhan University, open access, PDF in docs/refs/. Unsupervised DBSCAN on DGA.
+@article{dga_dbscan2020,
+  author  = {Liu, Yongxin and Song, Bin and Wang, Linong and Gao, Jiachen and Xu, Rihong},
+  title   = {Power Transformer Fault Diagnosis Based on Dissolved Gas Analysis by
+             Correlation Coefficient-{DBSCAN}},
+  journal = {Applied Sciences},
+  volume  = {10},
+  number  = {13},
+  pages   = {4440},
+  year    = {2020}
+}
+
+% idae2022: UNCITED (kept for reference). Author/volume/pages unverified — supply before citing.
+@article{idae2022,
+  author  = {Unknown},
+  title   = {Missing data imputation using an iterative denoising autoencoder
+             ({IDAE}) for dissolved gas analysis},
+  journal = {Electric Power Systems Research},
+  year    = {2022}
+}
+
+@inproceedings{kingma2014vae,
+  author    = {Kingma, Diederik P. and Welling, Max},
+  title     = {Auto-Encoding Variational {Bayes}},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2014}
+}
+
+@article{hinton2006reducing,
+  author  = {Hinton, Geoffrey E. and Salakhutdinov, Ruslan R.},
+  title   = {Reducing the dimensionality of data with neural networks},
+  journal = {Science},
+  volume  = {313},
+  number  = {5786},
+  pages   = {504--507},
+  year    = {2006}
+}
+
+% ---------- Compositional data analysis (C1 foundations) ----------
+
+% aitchison1982coda: foundational log-ratio paper. Verified by web audit 2026-06-30;
+% double-check volume/pages on the JRSS page before camera-ready.
+@article{aitchison1982coda,
+  author  = {Aitchison, John},
+  title   = {The statistical analysis of compositional data},
+  journal = {Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume  = {44},
+  number  = {2},
+  pages   = {139--177},
+  year    = {1982}
+}
+
+% dukarm2020simplex: closest DGA prior work - recognises the simplex structure of gas
+% proportions (4-D simplex generalising the Duval triangle) but uses barycentric/Euclidean
+% coordinates, NOT log-ratio (Aitchison) geometry. Verified 2026-06-30 (MDPI + DOI).
+@article{dukarm2020simplex,
+  author  = {Dukarm, James and Draper, Zachary and Piotrowski, Tomasz},
+  title   = {Diagnostic Simplexes for Dissolved-Gas Analysis},
+  journal = {Energies},
+  volume  = {13},
+  number  = {23},
+  pages   = {6459},
+  year    = {2020},
+  doi     = {10.3390/en13236459}
+}
+
+% ---------- Surveillance / informed-presence bias (C2 positioning) ----------
+
+% sackett1979bias: canonical catalogue of biases incl. diagnostic-suspicion bias.
+% Verified 2026-06-30 (James Lind Library + journal page): J Chronic Dis 32:51-63.
+@article{sackett1979bias,
+  author  = {Sackett, David L.},
+  title   = {Bias in analytic research},
+  journal = {Journal of Chronic Diseases},
+  volume  = {32},
+  number  = {1--2},
+  pages   = {51--63},
+  year    = {1979}
+}
+
+% haut2011surveillance: "the more you look, the more you find". Verified 2026-06-30:
+% JAMA 305(23):2462-2463.
+@article{haut2011surveillance,
+  author  = {Haut, Elliott R. and Pronovost, Peter J.},
+  title   = {Surveillance bias in outcomes reporting},
+  journal = {JAMA},
+  volume  = {305},
+  number  = {23},
+  pages   = {2462--2463},
+  year    = {2011}
+}
+
+% goldstein2016informed: controls for the NUMBER OF ENCOUNTERS in EHR studies - the exact
+% analogue of our n_samples control. Verified 2026-06-30 (Oxford Academic + PubMed 27852603):
+% Am J Epidemiol 184(11):847-855. NOTE: confirm the full author list on the journal page
+% (first two authors confirmed: Goldstein, Bhavsar).
+@article{goldstein2016informed,
+  author  = {Goldstein, Benjamin A. and Bhavsar, Nrupen A. and Phelan, Matthew and
+             Pencina, Michael J.},
+  title   = {Controlling for informed presence bias due to the number of health
+             encounters in an electronic health record},
+  journal = {American Journal of Epidemiology},
+  volume  = {184},
+  number  = {11},
+  pages   = {847--855},
+  year    = {2016}
+}
+
+% ---------- Recent state of the art (sent by supervisor) ----------
+
+% hybrid_aiscore2026: hybrid "AI-Score Index" fuses Duval/Rogers/Doernenburg into one weighted
+% score + ensemble ML classifier; 99.17% acc, MCC 98.76%. SUPERVISED benchmark.
+% PII S0378779626001707. Full PDF in docs/refs/hybrid_aiscore2026.pdf.
+@article{hybrid_aiscore2026,
+  author  = {Saleh, Abdelaziz G. and Azzam, A. E. and Attiya, Gamal and Ibrahim, Elhossiny},
+  title   = {Detecting Incipient Faults in Power Transformers through Hybrid Model
+             of {DGA} and Machine Learning},
+  journal = {Electric Power Systems Research},
+  volume  = {256},
+  pages   = {112877},
+  year    = {2026},
+  doi     = {10.1016/j.epsr.2026.112877}
+}
+
+% ramarao2026review: 34-page review (sent by supervisor); Related-Work backbone.
+% Full PDF in docs/refs/ramarao2026review.pdf.
+@article{ramarao2026review,
+  author  = {Ramarao, Gandi and Rao, K. Dhananjay and Chongala, Prasad and
+             Pavani, P. and Dawn, Subhojit and Ustun, Taha Selim},
+  title   = {Advances in dissolved gas analysis for power transformer diagnostics:
+             From traditional methods to artificial intelligence driven prognostics},
+  journal = {Engineering Applications of Artificial Intelligence},
+  volume  = {181},
+  pages   = {115390},
+  year    = {2026},
+  doi     = {10.1016/j.engappai.2026.115390}
+}

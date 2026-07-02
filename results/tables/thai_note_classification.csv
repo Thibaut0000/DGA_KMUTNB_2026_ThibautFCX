@@ -1,0 +1,20 @@
+﻿note,tier,english_gloss,n_samples,n_units
+มีเสียงดังผิดปกติ,A,abnormal loud noise from the transformer,1,1
+หม้อแปลงมีเสียงดัง,A,transformer making noise,1,1
+ค่า p.f สูง,A,high insulation power factor (tan delta),1,1
+ตามผล Single phase Impedance เกิน 2%,A,single-phase impedance deviation > 2% (winding deformation indicator),1,1
+พบค่าทดสอบ Resistance ไม่เรียงตาม Tap,A,winding resistance not monotonic across taps (winding/OLTC anomaly),1,1
+หม้อแปลงไม่ได้ใช้งาน วัดทางไฟฟ้าผิดปกติ,A,out of service; abnormal electrical measurements,1,1
+เนื่องจากมี OLTC เสียหาย,A,OLTC damaged,1,1
+หลังทดสอบ HV TEST แล้วมีปัญหา,A,problem found after HV test,1,1
+ตามผลเนื่องจาก Bkr. ระเบิด,B,follow-up after circuit-breaker explosion,6,6
+CVT ระเบิด,B,capacitive voltage transformer exploded,3,3
+"งูขึ้นใบมีด69kV SB-6955 phase a,b",B,snake on 69 kV disconnector blades (flashover event),1,1
+ตามผล 3 เดือนหลังตกกระแทก,C,follow-up 3 months after impact/drop damage,1,1
+ตามผล 1 เดือนหลังตกกระแทก,C,follow-up 1 month after impact/drop damage,1,1
+ติดตามผลหม้อแปลงตกกระแทกระหว่างติดตั้ง,C,transformer dropped/impacted during installation,1,1
+จ่ายโหลดเกิน 100%,C,sustained loading above 100% rating,2,2
+ตามผล C2H2,excluded,chemistry-triggered follow-up - circular with gas features,3,3
+ตามผลเนื่องจากพบC2H2,excluded,chemistry-triggered follow-up - circular,1,1
+เนื่องจากมีหม้อแปลงตัวใกล้เคียงระเบิดเกิดไฟลุกไหม้MMM-KT3A,excluded,"neighbouring transformer exploded - surveillance trigger, not own event",1,1
+ไม่น่าจะเป็นข้อมูลที่ได้จากเครื่อง DGA ที่ตรงกับใบแนบ (มั่วมา),excluded,operator flags the record itself as bogus - data-quality note,1,1

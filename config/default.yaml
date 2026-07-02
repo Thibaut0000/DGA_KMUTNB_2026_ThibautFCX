@@ -1,0 +1,78 @@
+# ----------------------------------------------------------------------
+# Central experiment configuration. Loaded by src/dga/config.py.
+# Override values on the command line or with a second YAML file.
+# ----------------------------------------------------------------------
+seed: 42
+
+paths:
+  raw_xlsx: data/raw/dga_main_tank.xlsx
+  processed: data/processed/dga_clean.parquet
+  results: results
+
+data:
+  # Columns kept as identifiers / metadata (not fed to the model)
+  meta_cols: [LOC, NAME, CODETX, MFG, SER, KV, MVA, YEAR_Energized,
+              "Sample Day", "Tested day", TEMP, WATER, NB]
+  # Gas columns available in the file
+  all_gases: [O2, N2, CO2, CO, H2, CH4, C2H2, C2H4, C2H6, C3H6, C3H8, TCG]
+  # Fault-diagnostic gases used as model features (atmospheric O2/N2 and the
+  # derived TCG are excluded by default; toggle below to experiment).
+  feature_gases: [H2, CH4, C2H2, C2H4, C2H6, CO, CO2]
+  include_atmospheric: false   # set true to add O2, N2
+  drop_tcg: true               # TCG is a sum of other gases (leakage)
+
+preprocessing:
+  transform: log1p             # log1p | none  (DGA ppm are highly skewed)
+  scaler: standard             # standard | robust | minmax
+  outlier_clip_quantile: 0.999 # clip absurd data-entry errors (e.g. O2=7e8)
+  drop_all_zero_rows: true
+
+autoencoder:
+  hidden_dims: [16, 8]
+  latent_dim: 3
+  activation: relu
+  dropout: 0.0
+  lr: 0.001
+  weight_decay: 0.00001
+  batch_size: 128
+  epochs: 200
+  early_stopping_patience: 20
+  val_split: 0.15
+
+vae:
+  hidden_dims: [16, 8]
+  latent_dim: 3
+  beta: 1.0                    # beta-VAE weight on KL term
+  lr: 0.001
+  batch_size: 128
+  epochs: 200
+
+# SD-CAE: severity-disentangled compositional autoencoder (see docs/problem_statement.md)
+compositional:
+  # Fault-type signature lives in the hydrocarbon gases (Duval/IEC use subsets of these).
+  gases: [H2, CH4, C2H2, C2H4, C2H6]
+  zero_delta: 0.001            # multiplicative zero-replacement (CLR is undefined at 0)
+  # (TCG for the health index is computed in temporal.py from the standard combustible set.)
+
+sdcae:
+  hidden_dims: [16, 8]
+  latent_dim: 2                # 2 gives the learned diagnostic map for free
+  activation: relu
+  dropout: 0.0
+  lr: 0.001
+  weight_decay: 0.00001
+  batch_size: 128
+  epochs: 200
+  early_stopping_patience: 20
+  val_split: 0.15
+  lambda_adv: 1.0              # adversarial severity-disentanglement weight (0 disables)
+  adv_hidden: 16
+
+clustering:
+  algorithm: kmeans            # kmeans | gmm | hdbscan
+  k_range: [2, 3, 4, 5, 6, 7, 8]
+  hdbscan_min_cluster_size: 30
+
+anomaly:
+  method: reconstruction       # reconstruction | isolation_forest | ocsvm
+  threshold_quantile: 0.95     # flag top 5% reconstruction error as anomalies

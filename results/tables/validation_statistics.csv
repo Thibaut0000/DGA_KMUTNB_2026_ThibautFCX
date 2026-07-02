@@ -1,0 +1,14 @@
+,0
+AUC_index,0.7403
+AUC_index_lo,0.6779
+AUC_index_hi,0.7994
+AUC_n,0.7615
+AUC_n_lo,0.7001
+AUC_n_hi,0.8218
+diff_lo,-0.0974
+diff_hi,0.055
+diff_p,0.58
+LR_physics_beyond_n,9.1305
+p_physics_beyond_n,0.0025
+LR_n_beyond_physics,51.0229
+p_n_beyond_physics,0.0

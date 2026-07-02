@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+
+# Data — keep raw out of git if large/confidential; track structure only
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+# Raw dataset = confidential operational utility data - NEVER commit it.
+data/raw/*
+!data/raw/.gitkeep
+
+# Results / model artifacts
+results/models/*
+!results/models/.gitkeep
+results/figures/*.png
+results/figures/*.pdf
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.synctex.gz
+paper/*.pdf
+paper/*.fls
+paper/*.fdb_latexmk
+paper/build.out
+
+# Test / tooling caches
+.pytest_cache/
+
+# OS
+.DS_Store
+
+# Reference PDFs — keep copyrighted papers out of version control
+docs/refs/*.pdf

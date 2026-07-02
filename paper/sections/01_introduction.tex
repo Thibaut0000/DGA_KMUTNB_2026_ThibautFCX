@@ -1,0 +1,55 @@
+\section{Introduction}
+% DRAFT (2026-06-17). Prose to own/refine; see docs/problem_statement.md. Keep claims modest.
+
+Power transformers are among the most critical and expensive assets in an electrical
+network, and an in-service failure can cause extended outages and high repair costs.
+Dissolved Gas Analysis (DGA) is the most widely used technique for the early detection
+of incipient faults: thermal and electrical stresses decompose the insulating oil and
+paper, releasing characteristic gases---hydrogen, methane, ethane, ethylene, acetylene,
+and the carbon oxides---whose relative amounts indicate the type of fault
+\cite{ieee_c57104,duval2002review}.
+
+Conventional interpretation methods, namely the IEC~60599 ratios, the Rogers ratios, and
+the Duval Triangle, are rule-based. They encode expert knowledge as fixed thresholds,
+require an expert to apply and arbitrate, and return a ``not determined'' result for a
+non-negligible share of samples \cite{iec60599,duval2002review}. Supervised machine
+learning can reach very high accuracy; a recent example fuses the conventional methods
+into a single score and feeds an ensemble classifier, reporting $99.17\%$ accuracy
+\cite{hybrid_aiscore2026}. Such methods, however, require labelled fault data---and often
+the conventional rules themselves as inputs---which utilities rarely have at fleet scale.
+
+This paper studies a label-free alternative on a real operational dataset of 4{,}563 main-tank
+samples from 628 transformers (2019--2024), and makes three contributions. We first observe
+that representations built on gas concentrations encode overall gassing \emph{magnitude} rather
+than fault \emph{type}, and show that the centred log-ratio (CLR) of the combustible-gas
+composition separates the two by construction, raising agreement with the Duval fault types
+from an adjusted Rand index of $0.16$ to $0.55$ with a simple linear projection; a neural
+autoencoder (SD-CAE) and an adversarial disentanglement term add nothing, which we report as
+negative ablations. We then show, second, that the
+field-event notes routinely used to validate such models are, in this fleet, \emph{confounded by
+surveillance bias}: a trivial sample count out-predicts the gas chemistry, and a label-free score
+built from each unit's early history loses its apparent forward validity once this count is
+controlled---a caution we support with a confound-free,
+chemistry-defined evaluation. Third, we build a label-free health/risk screening index that
+outranks conventional severity baselines, reported together with this confound floor.
+
+The contributions of this work are:
+\begin{itemize}
+  \item a label-free \emph{severity-disentangled compositional representation}: the centred
+        log-ratio of the combustible-gas composition, on which a linear two-dimensional
+        projection recovers Duval fault-type structure (ARI $0.16\rightarrow0.55$); the neural
+        (SD-CAE) and adversarial-independence variants are reported as negative ablations;
+  \item a finding that, in this fleet, the field-event label used to validate such models is
+        confounded by surveillance bias---a trivial sample count out-predicts the gas chemistry
+        and the apparent forward validity
+        vanishes once it is controlled---together with a confound-free, chemistry-defined
+        evaluation target;
+  \item a label-free health/risk screening index (severity, acetylene-aware, temporal, and
+        anomaly terms) that outranks conventional severity baselines, reported against the
+        confound floor.
+\end{itemize}
+
+The remainder of the paper is organised as follows. Section~\ref{sec:related} reviews related
+work; Section~\ref{sec:data} describes the dataset and preprocessing; Section~\ref{sec:method} the
+method; and Sections~\ref{sec:exp}--\ref{sec:results} the experiments and results, before the
+conclusion.

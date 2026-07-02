@@ -1,0 +1,6 @@
+,ARI_mean,ARI_std,n
+delta=0.0001,0.455,0.001,4542.0
+delta=0.001,0.545,0.002,4542.0
+delta=0.01,0.229,0.002,4542.0
+"temporal: fit<2022, eval>=2022",0.454,0.001,2184.0
+one latest sample per unit,0.346,0.021,628.0
