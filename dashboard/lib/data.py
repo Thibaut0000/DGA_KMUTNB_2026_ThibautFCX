@@ -21,7 +21,7 @@ SRC = PROJECT_ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from dga.config import load_config, set_seed                      # noqa: E402
+from dga.config import load_config, resolve, set_seed             # noqa: E402
 from dga import data as dga_data, conventional, health, clustering  # noqa: E402
 from dga.compositional import build_composition                   # noqa: E402
 from dga.models.sdcae import train_sdcae                          # noqa: E402
@@ -30,15 +30,34 @@ FULL = ["severity", "acetylene", "temporal", "anomaly"]
 DEFAULT_WEIGHTS = {"severity": 1.0, "acetylene": 2.0, "temporal": 1.0, "anomaly": 1.0}
 FEATURE_GASES = ["H2", "CH4", "C2H2", "C2H4", "C2H6", "CO", "CO2"]
 
+# Anonymised fallback dataset (scripts/make_dashboard_data.py) for deployments
+# where the confidential raw xlsx is absent (e.g. Streamlit Community Cloud).
+PUBLIC_PARQUET = PROJECT_ROOT / "data" / "public" / "dga_public.parquet"
+
 
 @st.cache_resource(show_spinner=False)
 def cfg():
     return load_config()
 
 
+def using_public_data() -> bool:
+    import os
+    if os.environ.get("DGA_FORCE_PUBLIC_DATA"):
+        return True
+    return not resolve(cfg().paths.raw_xlsx).exists()
+
+
 @st.cache_data(show_spinner="Loading and cleaning DGA records…")
 def get_clean() -> pd.DataFrame:
-    return dga_data.load_clean()
+    if not using_public_data():
+        return dga_data.load_clean()
+    if PUBLIC_PARQUET.exists():
+        df = pd.read_parquet(PUBLIC_PARQUET)
+        df.index.name = "sample_id"
+        return df
+    raise FileNotFoundError(
+        "Neither the raw dataset nor data/public/dga_public.parquet is available. "
+        "Run scripts/make_dashboard_data.py to generate the anonymised dataset.")
 
 
 @st.cache_data(show_spinner="Running conventional diagnostics (Duval / IEC / Rogers)…")
