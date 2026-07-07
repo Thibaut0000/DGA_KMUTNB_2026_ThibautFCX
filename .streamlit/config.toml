@@ -9,7 +9,10 @@ font = "sans serif"
 
 [server]
 headless = true
-fileWatcherType = "none"
+# "auto" reloads code on save (dev comfort); switch back to "none" for demos
+# so a mid-presentation file save can never interrupt the app.
+fileWatcherType = "auto"
+runOnSave = true
 
 [browser]
 gatherUsageStats = false
