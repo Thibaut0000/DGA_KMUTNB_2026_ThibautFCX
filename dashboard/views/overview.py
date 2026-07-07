@@ -5,15 +5,18 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from lib import charts, data, theme
+from lib.controls import scoring_profile
 
 
 def render():
     theme.hero(
         "Transformer Fleet Health — DGA Risk Intelligence",
         "Label-free ranking of a 628-transformer fleet from dissolved-gas analysis, "
-        "with SD-CAE compositional fault typing and an honest surveillance-bias control.",
+        "with compositional (CLR-PCA) fault typing and an honest surveillance-bias control.",
     )
 
+    scoring_profile()
+    st.write("")
     w = st.session_state.weights
     s = data.fleet_summary()
     ev = data.get_eval(**w)

@@ -9,11 +9,12 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 # --- make the project's `dga` package importable (mirrors scripts/_bootstrap) ----
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -21,10 +22,9 @@ SRC = PROJECT_ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from dga.config import load_config, resolve, set_seed             # noqa: E402
+from dga.config import load_config, resolve                       # noqa: E402
 from dga import data as dga_data, conventional, health, clustering  # noqa: E402
 from dga.compositional import build_composition                   # noqa: E402
-from dga.models.sdcae import train_sdcae                          # noqa: E402
 
 FULL = ["severity", "acetylene", "temporal", "anomaly"]
 DEFAULT_WEIGHTS = {"severity": 1.0, "acetylene": 2.0, "temporal": 1.0, "anomaly": 1.0}
@@ -119,16 +119,16 @@ def get_unit_history(codetx) -> pd.DataFrame:
     return sub.sort_values("date")
 
 
-@st.cache_resource(show_spinner="Training SD-CAE (compositional fault-type representation)…")
+@st.cache_data(show_spinner="Building the CLR-PCA fault-type map…")
 def get_sdcae() -> pd.DataFrame:
-    """Per-sample 2-D SD-CAE latent (lambda=0) + Duval class + KMeans cluster + gas mix."""
+    """Per-sample 2-D CLR-PCA code (the paper's deployed representation, deterministic)
+    + Duval class + KMeans cluster + gas mix. The SD-CAE autoencoder is a negative
+    ablation in the paper and is not used here."""
     df = get_clean_diag()
     c = cfg()
     comp = build_composition(df, c)
-    set_seed(42)
-    scfg = SimpleNamespace(**{**dict(c.sdcae), "latent_dim": 2, "lambda_adv": 0.0, "seed": 42})
-    res = train_sdcae(comp.C, comp.m, scfg, verbose=False)
-    Z = res.model.encode(comp.C)
+    Z = PCA(2, random_state=0).fit_transform(
+        StandardScaler().fit_transform(comp.C.astype("float64")))
     lab, _ = clustering.fit_kmeans(Z, 7, seed=42)
 
     out = pd.DataFrame({"z1": Z[:, 0], "z2": Z[:, 1]}, index=comp.index)

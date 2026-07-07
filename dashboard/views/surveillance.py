@@ -23,8 +23,9 @@ def render():
             st.plotly_chart(charts.hbar(s, "AUC vs field-event label", "AUC",
                                         highlight="confound", xrange=(0.45, 0.82)),
                             use_container_width=True, config={"displayModeBar": False})
-            st.caption("A trivial sample count (red) out-predicts the physics index — so any AUC "
-                       "against this label must be read against ~0.76.")
+            st.caption("A trivial sample count (red, 0.76) matches the physics index (0.74) — the "
+                       "difference is not significant (paired bootstrap p = 0.58). Any AUC against "
+                       "this label must be read against that floor.")
         else:
             st.info("Run `python scripts/run_label_confound.py` first.")
     with c2:
@@ -32,7 +33,16 @@ def render():
         ev = data.get_eval(**st.session_state.weights)
         st.plotly_chart(charts.decile_bars(ev["decile_note_rate"], ev["base_rate"]),
                         use_container_width=True, config={"displayModeBar": False})
-        st.caption(f"Current index AUC {ev['AUC']:.2f} — real signal, but capped by the 0.76 floor.")
+        st.caption(f"Current index AUC {ev['AUC']:.2f}. In a joint model the sample count adds "
+                   "signal far beyond the physics (likelihood-ratio p = 9e-13) while the physics "
+                   "retains a small real increment (p = 0.003): dominated, but not pure confound.")
+
+    st.markdown(
+        "<div class='card'><b>Label repair check.</b> 69% of the field notes contain Thai text "
+        "that the English keyword label misses. Translating them adds six own-unit electrical "
+        "events — and on this repaired label the count's advantage disappears entirely "
+        "(AUC 0.734 vs 0.735): part of the confound's edge was label incompleteness.</div>",
+        unsafe_allow_html=True)
 
     st.markdown("<div class='section-title'>The confound-free alternative: chemistry, not attention</div>",
                 unsafe_allow_html=True)
@@ -50,10 +60,11 @@ def render():
         st.markdown(
             "<div class='card'>We define a target that does <b>not</b> depend on operator attention: "
             "the <b>onset of arcing</b> — acetylene appearing within two years in a unit that has "
-            "none. Across 3,794 prediction points with only 45 onset events, ethylene and hydrogen "
-            "forecast it at AUC <b>0.64 / 0.63</b> (permutation p &lt; 0.01), while the sample count "
-            "is at chance (0.49). Modest, but genuine and confound-free — the right way to claim "
-            "early-warning value.</div>", unsafe_allow_html=True)
+            "none. Positives are rare and clustered (45 points from 17 onset units), so we use "
+            "unit-blocked intervals: ethylene and hydrogen forecast onset at AUC <b>0.64</b> "
+            "(95% CI 0.52–0.77) and <b>0.63</b> (0.53–0.73) — both excluding chance — while the "
+            "sample count is uninformative (0.49). Robust across nine threshold-and-horizon "
+            "variants (0.64–0.73).</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='card'><b>Take-away for the field:</b> any DGA risk model validated on "
             "operator-logged events should report a sample-count confound floor alongside its AUC.</div>",

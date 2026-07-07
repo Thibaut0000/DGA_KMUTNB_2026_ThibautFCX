@@ -5,12 +5,14 @@ import pandas as pd
 import streamlit as st
 
 from lib import charts, data, theme
+from lib.controls import scoring_profile
 
 _GASES = ["H2", "CH4", "C2H2", "C2H4", "C2H6", "CO", "CO2", "TCG"]
 
 
 def render():
     st.markdown("## Transformer inspector")
+    scoring_profile(compact=True)
     w = st.session_state.weights
     rk = data.get_risk(**w).sort_values("risk_score", ascending=False)
     meta = data.get_unit_meta()

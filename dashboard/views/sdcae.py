@@ -1,6 +1,7 @@
-"""Showcase: the SD-CAE learned diagnostic map + the ablation that justifies it."""
+"""Showcase: the label-free fault-type map (CLR-PCA) + the ablation behind it."""
 from __future__ import annotations
 
+import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -8,13 +9,15 @@ from lib import charts, data, theme
 
 
 def render():
-    st.markdown("## SD-CAE — learned, label-free fault map")
+    st.markdown("## Fault-type map — compositional (CLR-PCA)")
     st.markdown(
-        "<span class='muted'>A plain autoencoder on gas concentrations encodes <b>how much</b> gas "
-        "(severity). <b>SD-CAE</b> first splits each sample into a magnitude and a composition "
-        "(gas proportions, via the centred log-ratio), and encodes only the composition — so the "
-        "latent captures the <b>fault type</b>. Clustering it recovers Duval structure without any "
-        "labels (agreement ARI 0.14 → 0.47).</span>", unsafe_allow_html=True)
+        "<span class='muted'>Representations built on gas <b>concentrations</b> encode <b>how "
+        "much</b> gas there is (severity), not <b>which</b> fault. Splitting each sample into a "
+        "magnitude and a <b>composition</b> (gas proportions through the centred log-ratio) "
+        "removes severity by construction — and a simple two-dimensional <b>PCA</b> of that "
+        "composition recovers the Duval fault-type structure without any labels "
+        "(ARI 0.16 → 0.55). A neural autoencoder (SD-CAE) was tested and adds nothing: it is "
+        "reported as a negative ablation.</span>", unsafe_allow_html=True)
 
     sd = data.get_sdcae()
     c1, c2 = st.columns([1.5, 1])
@@ -28,33 +31,44 @@ def render():
     with c2:
         st.markdown("<div class='section-title'>Why it works</div>", unsafe_allow_html=True)
         st.markdown(
-            "<div class='card'>The encoder only ever sees the composition, so the same fault type "
-            "at any gassing level maps to the same point — <b>severity invariance by "
-            "construction</b>. The carbon oxides (cellulose markers) are excluded from the "
-            "composition and kept for the severity term elsewhere.</div>", unsafe_allow_html=True)
+            "<div class='card'>The projection only ever sees the composition, so the same fault "
+            "type at any gassing level maps to the same point — <b>severity invariance by "
+            "construction</b>. Being linear, the map is <b>deterministic</b> and its axes are "
+            "readable combinations of log-ratios an engineer can interpret.</div>",
+            unsafe_allow_html=True)
         st.markdown(
             "<div class='card'>Toggle to <b>severity (m)</b>: colour no longer separates the "
             "clusters — confirming the map encodes <i>type</i>, not magnitude.</div>",
             unsafe_allow_html=True)
+        st.markdown(
+            "<div class='card'><b>Honest negatives.</b> The SD-CAE autoencoder (ARI 0.47 ± 0.06) "
+            "does not beat this linear projection (0.545 ± 0.002), and an adversarial "
+            "severity-independence term makes things worse (0.30). Both are reported as negative "
+            "ablations in the paper.</div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>Ablation: it is the log-ratio geometry, not normalisation</div>",
-                unsafe_allow_html=True)
-    abl = data.get_table("sdcae_ablation")
-    if abl is not None and "latent_dim" in abl.columns:
-        d2 = abl[abl["latent_dim"] == 2]
-        names = [str(i).split(" [")[0] for i in d2.index]
-        fig = go.Figure()
-        fig.add_trace(go.Bar(name="ARI vs Duval (higher = better)", x=names,
-                             y=d2["ARI@k7_mean"], marker_color=theme.ACCENT,
-                             text=[f"{v:.2f}" for v in d2["ARI@k7_mean"]], textposition="outside"))
-        if "R2_m_mean" in d2.columns:
-            fig.add_trace(go.Bar(name="Severity leakage R²(m|z) (lower = better)", x=names,
-                                 y=d2["R2_m_mean"], marker_color=theme.BAD,
-                                 text=[f"{v:.2f}" for v in d2["R2_m_mean"]], textposition="outside"))
-        fig.update_layout(barmode="group", yaxis_title=None, xaxis_title=None)
-        st.plotly_chart(theme.style_fig(fig, height=380), use_container_width=True,
-                        config={"displayModeBar": False})
-        st.caption("Raw proportions barely help (0.15); the CLR composition jumps to ~0.47. The "
-                   "adversarial-independence variant (λ>0) over-removes signal, so we deploy λ=0.")
+    st.markdown("<div class='section-title'>Ablation: the gain is the log-ratio geometry, "
+                "not the model</div>", unsafe_allow_html=True)
+    tab = data.get_table("representation_baselines")
+    if tab is not None:
+        show = [("raw-log 5D + KMeans", "raw log"),
+                ("proportions 5D + KMeans", "proportions"),
+                ("CLR 5D (std) + KMeans", "CLR + KMeans"),
+                ("PCA-2 of CLR + KMeans", "CLR + PCA-2 (deployed)"),
+                ("[ref] AE-2D on CLR (paper)", "CLR + AE (SD-CAE, ablation)")]
+        rows = [r for r, _ in show if r in tab.index]
+        labels = [lbl for r, lbl in show if r in tab.index]
+        vals = tab.loc[rows, "ARI_mean"]
+        errs = tab.loc[rows, "ARI_std"]
+        colors = ["#9aa4b2", "#9aa4b2", "#90caf9", theme.ACCENT, theme.BAD][: len(rows)]
+        fig = go.Figure(go.Bar(
+            x=labels, y=vals, error_y=dict(type="data", array=errs, visible=True),
+            marker_color=colors, text=[f"{v:.2f}" for v in vals], textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{x}: ARI %{y:.3f}<extra></extra>"))
+        fig.update_layout(yaxis_title="ARI vs Duval (k=7)", xaxis_title=None)
+        st.plotly_chart(theme.style_fig(fig, height=360, legend=False),
+                        use_container_width=True, config={"displayModeBar": False})
+        st.caption("Raw proportions barely help; the CLR log-ratio geometry does the work, and a "
+                   "linear PCA projection beats the neural encoder — with 25x less seed variance.")
     else:
-        st.info("Run `python scripts/run_sdcae_ablation.py` to generate the ablation table.")
+        st.info("Run `python scripts/run_representation_baselines.py` to generate the ablation table.")

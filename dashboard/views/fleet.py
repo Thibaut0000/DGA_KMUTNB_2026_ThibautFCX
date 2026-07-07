@@ -7,14 +7,16 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from lib import data, theme
+from lib.controls import scoring_profile
 
 
 def render():
     st.markdown("## Fleet risk ranking")
     st.markdown("<span class='muted'>Every transformer scored by the label-free Health/Risk index "
-                "(physical gas features only). Adjust the component weights in the sidebar — the "
-                "ranking recomputes live.</span>", unsafe_allow_html=True)
+                "(physical gas features only). Pick a scoring profile — the ranking recomputes "
+                "live.</span>", unsafe_allow_html=True)
 
+    scoring_profile()
     w = st.session_state.weights
     rk = data.get_risk(**w)
     meta = data.get_unit_meta()
