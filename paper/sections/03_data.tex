@@ -7,7 +7,13 @@ We use DGA records from transformer main tanks: 4{,}563 samples from 628 transfo
 manufacturers, sampled between 2019 and 2024 (median six samples per unit over $\sim$4.5 years).
 Rated voltages are recorded as free-text multi-winding strings (e.g.\ ``115/22'') and are not
 used as model inputs. A per-gas summary is given in Table~\ref{tab:gases}.
-% \todo{State the source utility and the anonymisation rule agreed with the supervisor.}
+
+\textbf{Data provenance.}
+The dataset was assembled for this study from operational main-tank DGA records of in-service
+transformers in Thailand (multiple operational sources). Unit identifiers were anonymised, and
+no nameplate or location information is used. The raw data are not publicly available; an
+anonymised extract (hashed unit identifiers, dates, gas concentrations, and binary event flags)
+is released with our code for reproducibility.
 
 \begin{table}[t]
 \centering
