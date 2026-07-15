@@ -32,3 +32,6 @@ plotly>=5.22
 
 # Tests (tests/test_smoke.py)
 pytest>=8.0
+
+# Defense deck generator (presentation/build_pptx.py)
+python-pptx>=1.0
