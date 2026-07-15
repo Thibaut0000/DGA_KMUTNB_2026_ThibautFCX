@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Label-Free Transformer Health Monitoring — Final Presentation</title>
+<style>
+  :root{
+    --bg:#e9ebf2; --surface:#ffffff; --ink:#1c2128; --muted:#5b6470; --faint:#8a93a2;
+    --accent:#4f46e5; --accent-soft:#eef0fd; --good:#16a34a; --bad:#dc2626; --warn:#b45309;
+    --border:#e7e9f0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; background:var(--bg);
+    font-family:'Segoe UI',-apple-system,'Inter',Roboto,sans-serif; color:var(--ink);}
+  #stage{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .slide{
+    width:1280px; height:720px; background:var(--surface); border-radius:6px;
+    box-shadow:0 18px 60px -18px rgba(23,26,64,.35);
+    padding:56px 72px; display:none; flex-direction:column; position:absolute;
+  }
+  .slide.active{display:flex;}
+  /* ---------- typography ---------- */
+  h1{font-size:52px; font-weight:800; letter-spacing:-.02em; line-height:1.12;}
+  h2{font-size:34px; font-weight:800; letter-spacing:-.015em; margin-bottom:6px;}
+  .kicker{color:var(--accent); font-weight:700; text-transform:uppercase; letter-spacing:.12em;
+    font-size:14px; margin-bottom:10px;}
+  .sub{color:var(--muted); font-size:19px; line-height:1.45;}
+  p,li{font-size:19px; line-height:1.5;}
+  .muted{color:var(--muted);} .small{font-size:15px;}
+  strong{font-weight:700;}
+  /* ---------- layout helpers ---------- */
+  .row{display:flex; gap:28px; align-items:stretch;}
+  .col{flex:1; min-width:0;}
+  .grow{flex:1;}
+  .center{display:flex; align-items:center; justify-content:center;}
+  .mt{margin-top:18px;} .mtl{margin-top:28px;}
+  /* ---------- components ---------- */
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:18px 20px; box-shadow:0 1px 2px rgba(16,24,40,.04);}
+  .tile .n{font-size:44px; font-weight:800; letter-spacing:-.02em; line-height:1.05;}
+  .tile .l{color:var(--muted); font-size:15px; margin-top:4px;}
+  .card{background:#fbfbfd; border:1px solid var(--border); border-radius:14px; padding:20px 22px;}
+  .expert{border-left:4px solid var(--accent); background:var(--accent-soft);
+    border-radius:0 12px 12px 0; padding:12px 18px; font-size:15px; color:#3b3f6e;}
+  .expert b.tag{display:block; font-size:11px; letter-spacing:.14em; color:var(--accent);
+    text-transform:uppercase; margin-bottom:4px;}
+  .pill{display:inline-block; padding:3px 12px; border-radius:999px; font-size:14px; font-weight:700;}
+  .pill.good{background:#e7f6ec; color:var(--good); border:1px solid #bfe6cc;}
+  .pill.bad{background:#fdeaea; color:var(--bad); border:1px solid #f5c6c6;}
+  .pill.acc{background:var(--accent-soft); color:var(--accent); border:1px solid #d6d9f8;}
+  .figure{background:#fff; border:1px solid var(--border); border-radius:12px; padding:10px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .figure img{max-width:100%; max-height:100%; object-fit:contain;}
+  .figcap{color:var(--faint); font-size:13.5px; margin-top:8px; text-align:center;}
+  ul.checks{list-style:none;} ul.checks li{padding-left:26px; position:relative; margin-bottom:10px;}
+  ul.checks li::before{content:""; position:absolute; left:2px; top:9px; width:12px; height:12px;
+    border-radius:3px; background:var(--accent);}
+  ol.agenda{list-style:none; counter-reset:ag;}
+  ol.agenda li{counter-increment:ag; display:flex; gap:18px; align-items:baseline;
+    padding:14px 0; border-bottom:1px solid var(--border); font-size:23px; font-weight:600;}
+  ol.agenda li::before{content:counter(ag,decimal-leading-zero); color:var(--accent);
+    font-weight:800; font-size:20px;}
+  ol.agenda li span{color:var(--muted); font-weight:400; font-size:17px;}
+  /* ---------- chrome ---------- */
+  #bar{position:fixed; left:0; bottom:0; height:4px; background:var(--accent); width:0%; z-index:5;
+    transition:width .25s ease;}
+  #count{position:fixed; right:16px; bottom:10px; color:var(--faint); font-size:13px; z-index:5;}
+  .foot{position:absolute; left:72px; right:72px; bottom:22px; display:flex; justify-content:space-between;
+    color:var(--faint); font-size:13px;}
+  /* ---------- title slide ---------- */
+  .slide.title{background:linear-gradient(125deg,#3730a3 0%,#4f46e5 45%,#0891b2 120%); color:#fff;
+    justify-content:center;}
+  .slide.title h1{color:#fff; font-size:56px; max-width:980px;}
+  .slide.title .sub{color:#dfe3ff;}
+  .slide.title .who{margin-top:44px; color:#eef0ff; font-size:19px; line-height:1.65;}
+  .slide.title .kicker{color:#c4d8ff;}
+  /* ---------- section divider accent ---------- */
+  .divider-num{font-size:110px; font-weight:800; color:var(--accent-soft); line-height:1;
+    -webkit-text-stroke:2px var(--accent);}
+  @media print{
+    #stage{position:static;} .slide{display:flex !important; position:relative; page-break-after:always;
+      box-shadow:none; margin:0 auto;}
+    #bar,#count{display:none;}
+    @page{size:1280px 720px; margin:0;}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- ================= 1. TITLE ================= -->
+<section class="slide title">
+  <div class="kicker">Research Initiation Project — Final Presentation</div>
+  <h1>Finding Failing Transformers Without Labels</h1>
+  <p class="sub" style="font-size:24px; margin-top:16px; max-width:900px;">
+    Label-free health monitoring from dissolved-gas analysis —
+    and a hidden trap in how such models are validated.</p>
+  <div class="who">
+    <b>Thibaut Faucheux</b> — CESI Engineering School, France<br>
+    Supervised by <b>Dr.&nbsp;Rattanakorn Phadungthin</b> — KMUTNB, Bangkok, Thailand<br>
+    July 2026 · 5-week research project
+  </div>
+</section>
+
+<!-- ================= 2. AGENDA ================= -->
+<section class="slide">
+  <div class="kicker">Plan</div>
+  <h2>What the next 20 minutes look like</h2>
+  <ol class="agenda mtl">
+    <li>Context — transformers, gas analysis, and a fleet with no labels &nbsp;<span></span></li>
+    <li>Contribution 1 — a fault-type map learned without labels</li>
+    <li>Contribution 2 — the validation trap: surveillance bias</li>
+    <li>Contribution 3 — a fleet risk index &nbsp;<span>+ live dashboard demo</span></li>
+    <li>Take-aways — for the field, and for me</li>
+  </ol>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>Label-free DGA</span></div>
+</section>
+
+<!-- ================= 3. CONTEXT: DGA ================= -->
+<section class="slide">
+  <div class="kicker">1 · Context</div>
+  <h2>A blood test for transformers</h2>
+  <p class="sub">Power transformers are critical, million-euro assets. When something goes wrong
+    inside — overheating, sparking, arcing — the insulating oil breaks down and releases
+    <b>dissolved gases</b>. Measuring them is called <b>DGA</b>: Dissolved Gas Analysis.</p>
+  <div class="row mtl grow">
+    <div class="col center">
+      <svg viewBox="0 0 560 260" width="100%" height="100%" style="max-height:270px">
+        <rect x="10" y="60" width="150" height="150" rx="10" fill="#eef0fd" stroke="#4f46e5" stroke-width="2"/>
+        <text x="85" y="135" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Transformer</text>
+        <text x="85" y="156" text-anchor="middle" font-size="12" fill="#5b6470">fault heats the oil</text>
+        <path d="M168 135 H 218" stroke="#8a93a2" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="225" y="60" width="150" height="150" rx="10" fill="#fff" stroke="#e7e9f0" stroke-width="2"/>
+        <circle cx="270" cy="180" r="7" fill="#4f46e5" opacity=".5"/><circle cx="300" cy="150" r="5" fill="#4f46e5" opacity=".6"/>
+        <circle cx="330" cy="120" r="8" fill="#4f46e5" opacity=".4"/><circle cx="285" cy="105" r="4" fill="#4f46e5" opacity=".7"/>
+        <circle cx="320" cy="85" r="5" fill="#4f46e5" opacity=".5"/>
+        <text x="300" y="230" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Gases dissolve in oil</text>
+        <path d="M383 135 H 433" stroke="#8a93a2" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="440" y="60" width="110" height="150" rx="10" fill="#fff" stroke="#e7e9f0" stroke-width="2"/>
+        <rect x="458" y="150" width="14" height="40" fill="#4f46e5"/>
+        <rect x="478" y="120" width="14" height="70" fill="#06b6d4"/>
+        <rect x="498" y="165" width="14" height="25" fill="#8a93a2"/>
+        <text x="495" y="230" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Lab: 7 gases (ppm)</text>
+        <defs><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6 Z" fill="#8a93a2"/></marker></defs>
+      </svg>
+    </div>
+    <div class="col">
+      <div class="card">
+        <p style="font-size:17px"><b>Each gas is a clue:</b></p>
+        <ul class="small mt" style="list-style:none; font-size:16px; line-height:2">
+          <li><b>H2</b> — electrical sparking (early warning)</li>
+          <li><b>C2H2</b> (acetylene) — arcing, the most dangerous fault</li>
+          <li><b>C2H4 / CH4 / C2H6</b> — overheating, by temperature</li>
+          <li><b>CO / CO2</b> — the paper insulation is degrading</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>3</span></div>
+</section>
+
+<!-- ================= 4. THE PROBLEM ================= -->
+<section class="slide">
+  <div class="kicker">1 · Context</div>
+  <h2>The problem: experts are scarce, labels don't exist</h2>
+  <div class="row mtl">
+    <div class="col">
+      <div class="figure" style="height:330px"><img src="{{IMG:duval_triangle}}" alt="Duval triangle"></div>
+      <div class="figcap">The Duval Triangle — an expert rule from the 1970s, still the industry standard.</div>
+    </div>
+    <div class="col">
+      <ul class="checks">
+        <li><b>Expert rules</b> (Duval, IEC ratios) work — but need an expert to apply,
+          and often answer <i>“undetermined”.</i></li>
+        <li><b>Machine learning</b> reaches 99% accuracy in papers — but needs
+          <b>labelled faults</b>, which utilities almost never have.</li>
+        <li>Our fleet: <b>zero confirmed fault labels.</b> Just gas numbers and
+          messy operator notes.</li>
+      </ul>
+      <div class="card mt" style="background:var(--accent-soft); border-color:#d6d9f8">
+        <p style="font-size:18px"><b>Goal:</b> rank 628 transformers by risk and read fault
+          types — <b>using no labels at all.</b></p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>4</span></div>
+</section>
+
+<!-- ================= 5. DATA ================= -->
+<section class="slide">
+  <div class="kicker">1 · Context</div>
+  <h2>Real fleet data — not a curated benchmark</h2>
+  <div class="row mtl">
+    <div class="tile col"><div class="n">628</div><div class="l">transformers in service</div></div>
+    <div class="tile col"><div class="n">4,563</div><div class="l">oil samples analysed</div></div>
+    <div class="tile col"><div class="n">5 yrs</div><div class="l">of history (2019–2024)</div></div>
+    <div class="tile col"><div class="n">42</div><div class="l">manufacturers</div></div>
+  </div>
+  <div class="row mtl grow">
+    <div class="col card">
+      <p><b>What “real” means here</b></p>
+      <ul class="small mt" style="line-height:1.9; font-size:16.5px; padding-left:20px">
+        <li>Gas values stored as <i>text</i>, with dashes for missing</li>
+        <li>Operator notes mix English and Thai — <b>69% contain Thai</b></li>
+        <li>Notes log everything: real faults, but mostly maintenance and admin</li>
+        <li>No ground truth anywhere — the data was assembled from multiple operational sources and anonymised</li>
+      </ul>
+    </div>
+    <div class="col card">
+      <p><b>Why that is interesting</b></p>
+      <p class="small mt" style="font-size:16.5px; line-height:1.7">Most published methods are tested on
+        small, clean, balanced datasets (often &lt;200 samples). Whether they survive contact
+        with a real fleet is exactly the open question — and, as we will see, the messiness
+        itself hides a scientific finding.</p>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>5</span></div>
+</section>
+
+<!-- ================= 6. JOURNEY ================= -->
+<section class="slide">
+  <div class="kicker">1 · Context</div>
+  <h2>Five weeks that did not go as planned — on purpose</h2>
+  <div class="grow center" style="flex-direction:column">
+    <svg viewBox="0 0 1140 300" width="100%" style="max-height:330px">
+      <line x1="40" y1="60" x2="1100" y2="60" stroke="#e7e9f0" stroke-width="4"/>
+      <g font-family="inherit">
+      <circle cx="90" cy="60" r="11" fill="#4f46e5"/>
+      <text x="90" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Week 1</text>
+      <text x="90" y="95" text-anchor="middle" font-size="14" fill="#5b6470">Clean the data,</text>
+      <text x="90" y="114" text-anchor="middle" font-size="14" fill="#5b6470">rebuild expert rules</text>
+      <circle cx="330" cy="60" r="11" fill="#4f46e5"/>
+      <text x="330" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Week 2</text>
+      <text x="330" y="95" text-anchor="middle" font-size="14" fill="#5b6470">First models +</text>
+      <text x="330" y="114" text-anchor="middle" font-size="14" fill="#5b6470">a fleet risk index</text>
+      <circle cx="570" cy="60" r="14" fill="#dc2626"/>
+      <text x="570" y="30" text-anchor="middle" font-size="15" font-weight="800" fill="#dc2626">Week 3 — the discovery</text>
+      <text x="570" y="95" text-anchor="middle" font-size="14" fill="#5b6470">Our validation label is biased.</text>
+      <text x="570" y="114" text-anchor="middle" font-size="14" fill="#5b6470">Everything must be re-examined.</text>
+      <circle cx="810" cy="60" r="11" fill="#4f46e5"/>
+      <text x="810" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Week 4</text>
+      <text x="810" y="95" text-anchor="middle" font-size="14" fill="#5b6470">Attack our own results:</text>
+      <text x="810" y="114" text-anchor="middle" font-size="14" fill="#5b6470">simpler wins; Thai notes translated</text>
+      <circle cx="1040" cy="60" r="11" fill="#16a34a"/>
+      <text x="1040" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1c2128">Week 5</text>
+      <text x="1040" y="95" text-anchor="middle" font-size="14" fill="#5b6470">IEEE paper, dashboard,</text>
+      <text x="1040" y="114" text-anchor="middle" font-size="14" fill="#5b6470">this defense</text>
+      </g>
+    </svg>
+    <div class="card" style="max-width:820px">
+      <p style="font-size:18px; text-align:center">Research is not a straight line. Our two strongest
+        findings came from <b>questioning our own results</b> — not from the original plan.</p>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>6</span></div>
+</section>
+
+<!-- ================= 7. C1 SETUP ================= -->
+<section class="slide">
+  <div class="kicker">2 · Contribution 1 — fault types without labels</div>
+  <h2>The severity trap</h2>
+  <p class="sub">Feed raw gas concentrations to any model, and it learns
+    <b>“how much gas”</b> — not <b>“which fault”</b>. The same fault at low and high gassing
+    looks like two different things.</p>
+  <div class="row mtl grow center">
+    <div class="col center">
+      <svg viewBox="0 0 900 300" width="100%" style="max-height:300px">
+        <g>
+          <rect x="20" y="20" width="400" height="250" rx="12" fill="#fbfbfd" stroke="#e7e9f0" stroke-width="2"/>
+          <text x="220" y="52" text-anchor="middle" font-size="16" font-weight="700" fill="#1c2128">Concentrations (ppm)</text>
+          <line x1="60" y1="230" x2="390" y2="230" stroke="#c9cedb" stroke-width="2"/>
+          <text x="225" y="256" text-anchor="middle" font-size="13" fill="#8a93a2">total gas →</text>
+          <circle cx="110" cy="180" r="13" fill="#dc2626"/>
+          <text x="110" y="150" text-anchor="middle" font-size="13" fill="#5b6470">arcing, early</text>
+          <circle cx="345" cy="100" r="13" fill="#dc2626"/>
+          <text x="345" y="70" text-anchor="middle" font-size="13" fill="#5b6470">arcing, severe</text>
+          <path d="M135 172 Q 225 120 320 108" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+          <text x="228" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">same fault — far apart</text>
+        </g>
+        <path d="M440 145 H 480" stroke="#8a93a2" stroke-width="2.5" marker-end="url(#arr2)"/>
+        <g>
+          <rect x="490" y="20" width="390" height="250" rx="12" fill="#fbfbfd" stroke="#4f46e5" stroke-width="2"/>
+          <text x="685" y="52" text-anchor="middle" font-size="16" font-weight="700" fill="#1c2128">Proportions (the gas “recipe”)</text>
+          <circle cx="678" cy="150" r="13" fill="#16a34a"/>
+          <circle cx="694" cy="162" r="13" fill="#16a34a" opacity=".75"/>
+          <text x="686" y="205" text-anchor="middle" font-size="14" font-weight="700" fill="#16a34a">same fault — same place</text>
+        </g>
+        <defs><marker id="arr2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6 Z" fill="#8a93a2"/></marker></defs>
+      </svg>
+    </div>
+  </div>
+  <div class="expert"><b class="tag">For the experts</b>
+    A plain autoencoder on log-concentrations encodes magnitude: total gas is linearly readable
+    from its 2-D latent (R² = 0.63), and agreement with Duval classes is near-noise (ARI 0.14–0.16).</div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>7</span></div>
+</section>
+
+<!-- ================= 8. C1 RESULT ================= -->
+<section class="slide">
+  <div class="kicker">2 · Contribution 1 — fault types without labels</div>
+  <h2>Use the right geometry, and fault types appear</h2>
+  <div class="row mtl grow">
+    <div class="col" style="flex:1.5">
+      <div class="figure" style="height:380px"><img src="{{IMG:representation_ablation}}" alt="Representation ablation"></div>
+      <div class="figcap">Agreement with the expert (Duval) classes, from raw inputs to our representation.</div>
+    </div>
+    <div class="col">
+      <div class="tile"><div class="n" style="color:var(--accent)">0.16 → 0.55</div>
+        <div class="l">agreement with expert diagnosis (ARI) — <b>3.4× better</b>, with zero labels</div></div>
+      <div class="card mt">
+        <p style="font-size:17px">The trick is <b>not</b> a bigger model. It is treating gas
+          proportions with the mathematics made for proportions
+          (<b>log-ratios</b>), then using the simplest possible projection.</p>
+      </div>
+      <div class="expert mt"><b class="tag">For the experts</b>
+        Centred log-ratio (Aitchison geometry) on the 5 combustible gases → standardise → PCA-2 →
+        KMeans (k=7). ARI 0.545 ± 0.002 vs Duval. Deterministic. Holds on a strict temporal
+        split: fit pre-2022, score 2022+ → ARI 0.45.</div>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>8</span></div>
+</section>
+
+<!-- ================= 9. C1 MAP + HONEST NEGATIVE ================= -->
+<section class="slide">
+  <div class="kicker">2 · Contribution 1 — fault types without labels</div>
+  <h2>A data-driven diagnostic map — and an honest negative</h2>
+  <div class="row mtl grow">
+    <div class="col" style="flex:1.35">
+      <div class="figure" style="height:400px"><img src="{{IMG:clr_pca_map}}" alt="CLR-PCA fault map"></div>
+      <div class="figcap">Every dot is an oil sample. Colours = expert diagnosis, added <i>afterwards</i> —
+        the map itself never saw them.</div>
+    </div>
+    <div class="col">
+      <ul class="checks">
+        <li>Discharge, partial-discharge and thermal regions <b>emerge on their own</b></li>
+        <li>Readable axes — an engineer can interpret the directions</li>
+        <li>Deterministic: same data in, same map out</li>
+      </ul>
+      <div class="card mt" style="border-left:4px solid var(--bad)">
+        <p style="font-size:16.5px"><span class="pill bad">negative result</span></p>
+        <p class="small mt" style="font-size:16px; line-height:1.6">We also built a deep autoencoder
+          (SD-CAE) and an adversarial variant. <b>Neither beat the simple linear map.</b>
+          We report both as negatives in the paper — knowing what does <i>not</i> work
+          is a result too.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>9</span></div>
+</section>
+
+<!-- ================= 10. C2 SETUP ================= -->
+<section class="slide">
+  <div class="kicker">3 · Contribution 2 — the validation trap</div>
+  <h2>“The more you look, the more you find”</h2>
+  <p class="sub">To check our risk score, we used the only “truth” available: operator-logged
+    field events. Then we noticed something wrong.</p>
+  <div class="grow center">
+    <svg viewBox="0 0 980 330" width="100%" style="max-height:340px">
+      <g font-family="inherit">
+      <rect x="40" y="120" width="200" height="86" rx="12" fill="#eef0fd" stroke="#4f46e5" stroke-width="2"/>
+      <text x="140" y="155" text-anchor="middle" font-size="16" font-weight="700" fill="#1c2128">Operator worries</text>
+      <text x="140" y="178" text-anchor="middle" font-size="14" fill="#5b6470">about a transformer</text>
+      <path d="M245 163 H 305" stroke="#8a93a2" stroke-width="2.5" marker-end="url(#arr3)"/>
+      <rect x="310" y="120" width="200" height="86" rx="12" fill="#fff" stroke="#e7e9f0" stroke-width="2"/>
+      <text x="410" y="155" text-anchor="middle" font-size="16" font-weight="700" fill="#1c2128">Samples it more</text>
+      <text x="410" y="178" text-anchor="middle" font-size="14" fill="#5b6470">extra oil tests</text>
+      <path d="M515 163 H 575" stroke="#8a93a2" stroke-width="2.5" marker-end="url(#arr3)"/>
+      <rect x="580" y="120" width="200" height="86" rx="12" fill="#fff" stroke="#e7e9f0" stroke-width="2"/>
+      <text x="680" y="155" text-anchor="middle" font-size="16" font-weight="700" fill="#1c2128">Logs more notes</text>
+      <text x="680" y="178" text-anchor="middle" font-size="14" fill="#5b6470">events get recorded</text>
+      <path d="M785 163 H 845" stroke="#8a93a2" stroke-width="2.5" marker-end="url(#arr3)"/>
+      <rect x="850" y="120" width="110" height="86" rx="12" fill="#fdeaea" stroke="#dc2626" stroke-width="2"/>
+      <text x="905" y="155" text-anchor="middle" font-size="16" font-weight="800" fill="#dc2626">“Risky”</text>
+      <text x="905" y="178" text-anchor="middle" font-size="13" fill="#b45309">in the data</text>
+      <path d="M905 210 C 905 290, 140 290, 140 210" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arr4)"/>
+      <text x="522" y="305" text-anchor="middle" font-size="15" font-weight="700" fill="#dc2626">the loop feeds itself — attention, not chemistry</text>
+      </g>
+      <defs>
+        <marker id="arr3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8a93a2"/></marker>
+        <marker id="arr4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="expert"><b class="tag">For the experts</b>
+    This is <i>surveillance / informed-presence bias</i>, well known in medicine and electronic
+    health records (Sackett 1979; Haut &amp; Pronovost 2011; Goldstein 2016). To our knowledge,
+    never reported for DGA — models in this field are routinely validated against such labels.</div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>10</span></div>
+</section>
+
+<!-- ================= 11. C2 EVIDENCE ================= -->
+<section class="slide">
+  <div class="kicker">3 · Contribution 2 — the validation trap</div>
+  <h2>Three tests, one verdict</h2>
+  <div class="figure mt" style="height:330px"><img src="{{IMG:confound_panel}}" alt="Surveillance bias analysis"></div>
+  <div class="row mt">
+    <div class="col card"><p class="small" style="font-size:15.5px"><b>(a) The tie.</b> Simply counting
+      <i>how often a unit was sampled</i> predicts logged events as well as all our
+      chemistry combined (0.76 vs 0.74 — statistically indistinguishable).</p></div>
+    <div class="col card"><p class="small" style="font-size:15.5px"><b>(b) No foresight.</b> Control for
+      the sample count, and the score's ability to predict <i>future</i> events drops to a
+      coin flip (0.50).</p></div>
+    <div class="col card"><p class="small" style="font-size:15.5px"><b>(c) The fix.</b> Define the target
+      by <i>chemistry</i> (arcing onset) instead of attention — now gases predict (0.64) and
+      the count does not (0.49).</p></div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>11</span></div>
+</section>
+
+<!-- ================= 12. THAI NOTES ================= -->
+<section class="slide">
+  <div class="kicker">3 · Contribution 2 — the validation trap</div>
+  <h2>Repairing the label: 211 Thai notes, read one by one</h2>
+  <div class="row mtl">
+    <div class="tile col"><div class="n">69%</div><div class="l">of operator notes contain Thai —
+      invisible to the English keyword filter</div></div>
+    <div class="tile col"><div class="n">211</div><div class="l">distinct Thai notes translated and
+      classified (released for expert validation)</div></div>
+    <div class="tile col"><div class="n">+6</div><div class="l">genuine electrical events recovered
+      (noise, breaker explosions, insulation symptoms)</div></div>
+  </div>
+  <div class="row mtl grow">
+    <div class="col card">
+      <p style="font-size:17.5px"><b>Example finds</b></p>
+      <p class="small mt" style="font-size:16px; line-height:1.9">
+        “หม้อแปลงมีเสียงดัง” — <i>transformer making abnormal noise</i><br>
+        “ตามผลเนื่องจาก Bkr. ระเบิด” — <i>follow-up after breaker explosion</i><br>
+        “ค่า p.f สูง” — <i>high insulation power factor</i></p>
+    </div>
+    <div class="col card" style="background:var(--accent-soft); border-color:#d6d9f8">
+      <p style="font-size:17.5px"><b>The punchline</b></p>
+      <p class="small mt" style="font-size:16.5px; line-height:1.7">On the repaired label, the sample-count's
+        advantage <b>disappears entirely</b> (0.734 vs 0.735). Part of the “trap” was simply
+        that the label was incomplete — in a language the pipeline didn't read.</p>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>12</span></div>
+</section>
+
+<!-- ================= 13. C3 INDEX ================= -->
+<section class="slide">
+  <div class="kicker">4 · Contribution 3 — from research to practice</div>
+  <h2>A triage list for the maintenance team</h2>
+  <div class="row mtl grow">
+    <div class="col" style="flex:1.4">
+      <div class="figure" style="height:370px"><img src="{{IMG:health_decile_note_rate}}" alt="Event rate by risk decile"></div>
+      <div class="figcap">Fleet sorted into 10 risk groups by our label-free index. Real logged events
+        concentrate exactly where the index says they should.</div>
+    </div>
+    <div class="col">
+      <div class="tile"><div class="n" style="color:var(--bad)">27%</div>
+        <div class="l">event rate in the riskiest 10% of the fleet…</div></div>
+      <div class="tile mt"><div class="n" style="color:var(--good)">2%</div>
+        <div class="l">…versus the safest 10%</div></div>
+      <div class="card mt">
+        <p class="small" style="font-size:16px; line-height:1.65">Four transparent ingredients:
+          gas severity, <b>acetylene</b> (arcing), the <b>speed</b> of hydrogen rise, and
+          statistical novelty. No black box — and always reported <i>together with</i> the
+          surveillance-bias floor from the previous slides.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>13</span></div>
+</section>
+
+<!-- ================= 14. DEMO ================= -->
+<section class="slide">
+  <div class="kicker">4 · Contribution 3 — from research to practice</div>
+  <div class="grow center" style="flex-direction:column; gap:26px">
+    <div class="divider-num">DEMO</div>
+    <h2 style="text-align:center">The whole project, live</h2>
+    <div class="card" style="width:760px">
+      <ul class="small" style="list-style:none; font-size:17.5px; line-height:2.2">
+        <li><b>1.</b> Fleet ranking — 628 units re-ranked live as we switch scoring profile</li>
+        <li><b>2.</b> Transformer inspector — one unit's gas history, expert diagnoses, “why this score”</li>
+        <li><b>3.</b> The fault-type map and the surveillance-bias evidence — the paper, interactive</li>
+      </ul>
+    </div>
+    <p class="muted small">localhost:8501 — runs on the anonymised dataset · if the demo gods object,
+      every view also exists as a paper figure</p>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>14</span></div>
+</section>
+
+<!-- ================= 15. TAKE-AWAYS ================= -->
+<section class="slide">
+  <div class="kicker">5 · Take-aways</div>
+  <h2>What this project says to the field</h2>
+  <div class="row mtl">
+    <div class="col card">
+      <p><span class="pill acc">1</span></p>
+      <p class="mt" style="font-size:18px"><b>The right geometry beats a bigger model.</b></p>
+      <p class="small mt muted" style="font-size:15.5px">A linear method in the correct
+        mathematical space outperformed deep networks — simpler, interpretable, deployable.</p>
+    </div>
+    <div class="col card">
+      <p><span class="pill acc">2</span></p>
+      <p class="mt" style="font-size:18px"><b>Validation labels can lie.</b></p>
+      <p class="small mt muted" style="font-size:15.5px">Any DGA risk model validated on
+        operator-logged events should report the sample-count “confound floor” — otherwise
+        surveillance can be mistaken for diagnostic skill.</p>
+    </div>
+    <div class="col card">
+      <p><span class="pill acc">3</span></p>
+      <p class="mt" style="font-size:18px"><b>Honest negatives are results.</b></p>
+      <p class="small mt muted" style="font-size:15.5px">Deep SVDD, VAE, adversarial
+        disentanglement, RUL modelling: tested, rejected, documented. Future work starts
+        further ahead because of it.</p>
+    </div>
+  </div>
+  <div class="card mtl" style="background:#fbfbfd">
+    <p style="font-size:17px"><b>Deliverables:</b> a 6-page IEEE paper draft (3 contributions) ·
+      a reproducible pipeline (one command regenerates every number, 10 automated tests) ·
+      an anonymised public dataset extract · the interactive dashboard.</p>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>15</span></div>
+</section>
+
+<!-- ================= 16. PERSONAL ================= -->
+<section class="slide">
+  <div class="kicker">5 · Take-aways</div>
+  <h2>What five weeks of research taught me</h2>
+  <div class="row mtl grow">
+    <div class="col">
+      <ul class="checks" style="font-size:18px">
+        <li><b>The scientific method, for real</b> — hypothesis, test, and the discipline to
+          pivot when the evidence disagrees with the plan</li>
+        <li><b>Statistical honesty</b> — confidence intervals, paired tests, blocked
+          bootstraps; “0.76 vs 0.74” means nothing until you test it</li>
+        <li><b>Attack your own results first</b> — the finding that a simple method beat our
+          own headline model came from auditing ourselves before reviewers would</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="checks" style="font-size:18px">
+        <li><b>A full research stack</b> — Python/PyTorch, statistics, LaTeX/IEEE writing,
+          git, automated testing, Streamlit</li>
+        <li><b>Working across languages and cultures</b> — a French student, a Thai fleet,
+          English science; 211 Thai field notes read and classified</li>
+        <li><b>Scoping</b> — five weeks forces choices: what to cut, what to
+          consolidate, what to hand to future work</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>CESI × KMUTNB — Research Initiation 2026</span><span>16</span></div>
+</section>
+
+<!-- ================= 17. THANKS ================= -->
+<section class="slide title">
+  <div class="kicker">Thank you</div>
+  <h1 style="font-size:48px">Questions?</h1>
+  <p class="sub" style="font-size:20px; margin-top:18px">Thibaut Faucheux · CESI × KMUTNB<br>
+    With thanks to Dr. Rattanakorn Phadungthin for the supervision and domain guidance.</p>
+  <div class="who" style="margin-top:38px; font-size:16px; color:#dfe3ff">
+    628 transformers · 4,563 samples · ARI 0.16 → 0.55 without labels ·
+    one validation trap exposed · 6-page IEEE paper · live dashboard
+  </div>
+</section>
+
+</div>
+<div id="bar"></div>
+<div id="count"></div>
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=Math.min(Math.max(parseInt(location.hash.slice(1))||0,0),slides.length-1);
+  const stage=document.getElementById('stage'),bar=document.getElementById('bar'),
+        count=document.getElementById('count');
+  function fit(){const s=Math.min(innerWidth/1320,innerHeight/770);
+    slides.forEach(sl=>sl.style.transform=`scale(${s})`);}
+  function show(n){i=Math.min(Math.max(n,0),slides.length-1);
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    count.textContent=(i+1)+' / '+slides.length;
+    history.replaceState(null,'','#'+i);}
+  addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1);}
+    if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1);}
+    if(e.key==='Home')show(0); if(e.key==='End')show(slides.length-1);});
+  addEventListener('click',e=>{if(!e.target.closest('a'))show(i+1);});
+  addEventListener('resize',fit);
+  fit();show(i);
+</script>
+</body>
+</html>
