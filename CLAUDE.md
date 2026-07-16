@@ -112,7 +112,23 @@ without installing. No GPU needed — the data is small; CPU PyTorch is fine.
   claim to beat supervised methods (different setting). Build novelty on established ideas
   (compositional data analysis, disentanglement) applied in a new, label-free way to DGA.
 
-## Current status — Week 2, 24 Jun (reframed after a research campaign)
+## Current status — Week 5, 16 Jul (final; see docs/lab_notebook.md for the full history)
+
+All deliverables are DONE and coherent (coherence audit 2026-07-16): 6-page IEEE paper,
+final report (docs/final_report_EN.md), defense decks (presentation/, HTML + PPTX),
+dashboard, lab notebook, defense-prep notes (docs/COURS_soutenance.md), GitHub repo
+(Thibaut0000/DGA_KMUTNB_2026_ThibautFCX, private).
+
+**Canonical numbers (use these; anything else is stale):** C1 = CLR -> std -> PCA-2 -> KMeans,
+ARI 0.16 -> 0.545 +/- 0.002 vs Duval (SD-CAE AE 0.474 and adversary = published negatives;
+temporal split 0.45; delta-sensitive, disclosed). C2 = surveillance bias: n_samples AUC 0.76
+vs index 0.74 (paired bootstrap p=0.58, n.s.); LR tests: count beyond physics p=9e-13, physics
+beyond count p=0.003; forward 0.54 -> 0.50 controlled; chemistry target (arcing onset) = 45
+positive points from 17 units, C2H4 AUC 0.64 unit-blocked CI [0.52,0.77]; Thai notes 69%,
+211 translated, +6 tier-A units, repaired label 0.734 vs 0.735. C3 = index (sev 1, acet 2,
+temp 1, anom 1), deciles ~27% -> ~2%, always co-reported with the 0.76 floor.
+
+## Archived status — Week 2, 24 Jun (superseded by the 2026-06-30 audit; numbers below are stale)
 
 Built and validated: SD-CAE fault-type representation, a label-free Health/Risk index, conventional
 + anomaly comparisons. Then a 5-probe multi-agent research campaign (Workflow) reshaped the emphasis.

@@ -350,10 +350,10 @@ def s06_journey(prs):
     ln.line.color.rgb = BORDER; ln.line.width = Pt(3); _noshadow(ln)
     weeks = [
         (1.45, ACCENT, "Week 1", "Clean the data,\nrebuild expert rules", 0.14),
-        (4.05, ACCENT, "Week 2", "First models +\na fleet risk index", 0.14),
-        (6.65, BAD, "Week 3 — discovery", "Our validation label is biased.\nEverything re-examined.", 0.18),
-        (9.25, ACCENT, "Week 4", "Attack our own results: simpler\nwins; Thai notes translated", 0.14),
-        (11.85, GOOD, "Week 5", "IEEE paper, dashboard,\nthis defense", 0.14),
+        (4.05, BAD, "Week 2 — discovery", "Risk index built — then we find\nour validation label is biased", 0.18),
+        (6.65, ACCENT, "Week 3", "Attack our own results: simpler\nwins; Thai notes translated", 0.14),
+        (9.25, ACCENT, "Week 4", "Consolidate: 6-page paper,\ndashboard, defense decks", 0.14),
+        (11.85, GOOD, "Week 5", "Final report, coherence audit,\nthis defense", 0.14),
     ]
     for cx, col, wk, desc, r in weeks:
         c = s.shapes.add_shape(MSO_SHAPE.OVAL, Inches(cx - r), ly - Inches(r),

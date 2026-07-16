@@ -17,7 +17,8 @@ data/raw/*
 # Results / model artifacts
 results/models/*
 !results/models/.gitkeep
-results/figures/*.png
+# PNG figures are tracked (referenced by the final report and decks; regenerable
+# via run_all.py). Vector duplicates stay out.
 results/figures/*.pdf
 
 # LaTeX build artifacts
@@ -28,6 +29,7 @@ paper/*.bbl
 paper/*.blg
 paper/*.synctex.gz
 paper/*.pdf
+!paper/main.pdf
 paper/*.fls
 paper/*.fdb_latexmk
 paper/build.out

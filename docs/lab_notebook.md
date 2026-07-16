@@ -251,3 +251,59 @@ Daily, ~5 minutes. This is *your* record (keep ownership). Format per entry:
   Consistency verified: 0 missing cite keys, 0 missing figures, 0 broken \ref; 4 rendered \todo left
   (abstract one-liner, hyperparameter table, 2 figure adds). No local LaTeX -> build on Overleaf/KMUTNB.
   Next: optional Reviewer-2 pass (/review-paper), fill the 4 todos, align with supervisor.
+
+## 2026-06-25/26 — Week 2 · Reviewer-2 pass + paper hardening + first PDF builds
+- **Did:** critical Reviewer-2 pass on all sections; fixed the fatal S1/abstract contribution
+  mismatch; 4 successive multi-agent coherence audits (confirmed issues 4 -> 6 -> 1 -> 2, all fixed);
+  new title (approved later): "Label-Free Compositional DGA Representations and a Surveillance-Bias
+  Caution for Transformer Risk Screening". First reproducible PDF builds via the texlive Docker image.
+- **Found:** references.bib had % comments INSIDE @entries + @standard type -> BibTeX silently dropped
+  9 entries (all citations undefined). Fixed (comments outside braces, @misc). 6 pages, 0 unresolved.
+- **Implies:** the paper is compile-clean and internally consistent; hedging aligned everywhere
+  (fleet-scoped claims, "apparent" forward validity).
+
+## 2026-06-30 — Week 3 · deep adversarial audit: the linear model wins
+- **Did:** 5-lens multi-agent audit + 5 new adversarial experiments against our own headlines
+  (scripts: run_representation_baselines, run_clr_robustness, run_validation_statistics,
+  run_chemistry_blocked_stats, run_thai_label_extension). Full findings: docs/deep_audit_2026-06-30.md.
+- **Found (the big one):** **PCA-2 of standardised CLR + KMeans = ARI 0.545 ± 0.002 vs Duval — beats
+  the SD-CAE autoencoder (0.474 ± 0.055).** The gain is the log-ratio geometry, not the network.
+  Robustness: temporal split (fit <2022, score 2022+) ARI 0.454; delta-sensitive (0.455/0.545/0.229
+  for 1e-4/1e-3/1e-2); latest-per-unit 0.346. Statistics: 0.74 vs 0.76 NOT significant (paired
+  bootstrap p=0.58); physics adds beyond n_samples (LR p=0.003) but n dominates (p=9e-13); chemistry
+  target = 45 positive points from only **17 onset units** -> unit-blocked CIs [0.52,0.77]/[0.53,0.73]
+  (naive permutation p was anti-conservative, replaced). **Thai notes: 69% of notes contain Thai**
+  (not 23%); translated all 211 distinct notes, +6 tier-A units; on the repaired label the count's
+  advantage disappears (0.734 vs 0.735). Literature verified: Dukarm 2020 (simplex, no log-ratios),
+  Goldstein 2016 (conditioning on encounter count = our control), Aitchison 1982.
+- **Implies:** C1 reframed around the compositional geometry (SD-CAE = negative ablation); C2
+  sharpened (dominated-but-not-pure confound); every AUC now carries honest intervals.
+- **Also:** git init + first commit (raw data excluded); run_all.py; pytest smoke suite (10 tests);
+  Streamlit dashboard built (6 pages, wired live to the dga package), smoke-tested headless.
+
+## 2026-07-03 — Week 3 · paper reframe applied + GitHub
+- **Did:** applied the reframe to all paper sections (abstract -> conclusion), new figures
+  (representation_ablation, clr_pca_map), verified citations added, supervisor briefing written
+  (docs/supervisor_briefing_2026-06-30.md). Pushed to github.com/Thibaut0000/DGA_KMUTNB_2026_ThibautFCX
+  (private); anonymised public extract (data/public/dga_public.parquet) + dashboard fallback so the
+  app runs without the confidential raw file.
+- **Supervisor sign-off obtained on: C1 reframe, title, Thai table, provenance option B.**
+
+## 2026-07-07/08 — Week 4 · consolidation
+- **Did:** dashboard UX redesign (scoring profiles replace sidebar sliders; fault-map page now uses
+  the deployed CLR-PCA, not the AE); data-provenance statement inserted (S3, option B: anonymised,
+  multi-source, extract released); figures consolidated into two figure* panels -> back to 6 pages;
+  defense decks built (HTML self-contained + native PPTX, 17 slides each).
+- **Found:** adding content repeatedly pushed the paper to 7 pages; reclaimed via panel figures,
+  one EDA figure dropped, conclusion trimmed. 6 pages, 0 unresolved refs.
+
+## 2026-07-16 — Week 5 · cross-deliverable coherence audit (pre-defense)
+- **Did:** full coherence check across paper, final report, decks, lab notebook, README, defense-prep
+  notes, and the GitHub repository.
+- **Found:** final report + defense-prep notes still told the pre-reframe story (ARI 0.47 headline,
+  no surveillance-bias contribution, no 0.76 floor; prep notes even coached "AE beats PCA" — the
+  opposite of our finding); deck timeline had the discovery in week 3 (actually week 2); lab notebook
+  stopped at 24 Jun. All fixed today; decks rebuilt; repository synchronised.
+- **Implies:** all deliverables now tell the same (reframed) story with the same numbers:
+  ARI 0.16 -> 0.55 (AE 0.47 = negative); AUC 0.74 [0.68,0.80] vs count 0.76 (p=0.58); 17 onset
+  units, CI [0.52,0.77]; Thai 69%, +6 units, 0.734 vs 0.735.
